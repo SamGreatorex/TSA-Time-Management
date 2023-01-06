@@ -1,31 +1,28 @@
 
-import React, { Component } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Components/Home/Home';
-import About from './Components/About/About';
+import Tasks from './Components/Tasks/Tasks';
+import TimeCards from './Components/Timecards/Timecards';
 import HeaderBar from './Components/HeaderBar/header';
 import 'antd/dist/reset.css';
-
+import { Provider } from "react-redux";
+import store from "./redux/store";
 
 function App() {
   return (
+    <Provider store={store}>
     <Router>
             <HeaderBar/>
          <div>
-          {/* <h2>Welcome to React Router Tutorial</h2> */}
-          {/* <nav className="navbar navbar-expand-lg navbar-light bg-light">
-          <ul className="navbar-nav mr-auto">
-            <li><Link to={'/'} className="nav-link"> Home </Link></li>
-            <li><Link to={'/about'} className="nav-link">About</Link></li>
-          </ul>
-          </nav> */}
-          <hr />
           <Routes>
               <Route exact path='/' element={<Home/>} />
-              <Route path='/about' element={<About/>} />
+              <Route path='/tasks' element={<Tasks/>} />
+              <Route path='/timecards' element={<TimeCards/>} />
           </Routes>
         </div>
       </Router>
+      </Provider>
   );
 }
 
