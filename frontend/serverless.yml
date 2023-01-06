@@ -1,11 +1,12 @@
 service: time-management-frontend
 provider:
   name: aws
+  stage: dev
   profile: se-demo
   region: eu-west-2
 custom:
   client:
-    bucketName: time-management-frontend
+    bucketName: time-management-frontend-${opt:stage, self:provider.stage}
     distributionFolder: build
     indexDocument: index.html
     errorDocument: index.html

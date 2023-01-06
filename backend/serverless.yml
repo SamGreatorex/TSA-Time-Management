@@ -1,12 +1,26 @@
 	
 # Service name
-service: serverless-template
+service: time-management-backend
 
-app: serverless-template
+app: time-management-backend
 custom:
   serverless-offline:
     httpPort: 4000
     useChildProcesses: true
+  prune:
+    automatic: true
+    number: 1
+  cors-config:
+    origins:
+      - '*'
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: false
 provider:
   name: aws
   stage: dev
@@ -24,6 +38,7 @@ provider:
   environment:
     NODE_ENV: ${file(./.env.yml):${opt:stage, self:provider.stage}.NODE_ENV}
     STAGE: ${opt:stage, self:provider.stage}
+    TASK_TABLE: ${opt:stage, self:provider.stage}-tsa-tasks
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -50,13 +65,50 @@ provider:
       - X-Amz-User-Agent
     allowCredentials: false
 functions:
-  testLambda:
-    handler: handler.testLambda
+# Time Tasks
+  createTask:
+    handler: Tasks/handler.createTask
     events:
       - http:
-          path: serverless-template/testlambda
-          method: get
+          path: tasks
+          method: post
           cors: ${self:custom.cors-config}
+resources:
+  Resources:
+    # Time Tasks
+    TimeEntryTasksDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: TaskId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: TaskId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${opt:stage, self:provider.stage}-tsa-tasks
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES          
+  # Users
+    TSAUsersDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: UserId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: UserId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: tsa-users-${opt:stage, self:provider.stage}
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
 package:
   exclude:
     - .nyc_output/**
