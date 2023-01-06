@@ -1,0 +1,32 @@
+service: time-management-frontend
+provider:
+  name: aws
+  profile: se-demo
+  region: eu-west-2
+custom:
+  client:
+    bucketName: time-management-frontend
+    distributionFolder: build
+    indexDocument: index.html
+    errorDocument: index.html
+    uploadOrder:
+      - .*/apps/.*
+      - .*/assets/.*
+      - .*/css/.*
+      - .*/fonts/.*
+      - .*/iconfont/.*
+      - .*/images/.*
+      - .*/maintmode/.*
+      - .*/p2pmigration/.*
+      - .*/predictive-engagement-website/.*
+      - .*/static/.*
+      - .*/testdrive/.*
+      - .*/webChatComponent/.*
+      - .*/wizard/.*
+      - .js
+      - .json
+      - .ico
+      - .txt
+      - .html
+plugins:
+  - serverless-finch

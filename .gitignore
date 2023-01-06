@@ -1,0 +1,3 @@
+# Frontend Ignores
+frontend/build
+frontend/node_modules
