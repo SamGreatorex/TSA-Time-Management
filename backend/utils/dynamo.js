@@ -52,5 +52,31 @@ module.exports.dynamoDeleteItem = async (tableName, itemIdName, itemIdValue)  =>
   }
 }
 
+module.exports.dynamoScan = async (tableName, FilterExpression, ExpressionAttributeNames, ExpressionAttributeValues)  => {
+
+
+  // console.log(`Deleting ${itemIdName}: ${itemIdValue} from table: ${tableName}`);
+
+try
+{
+  const params = {
+    TableName: tableName,
+    FilterExpression,
+    ExpressionAttributeNames,
+    ExpressionAttributeValues
+  };
+  // logger.info('Getting data using params: ' + JSON.stringify(params, null, 2));
+  const resp = await dynamoDb.scan(params).promise();
+
+   console.log(`Items Found:`, resp);
+   return resp && Array.isArray(resp.Items) && resp.Items.length === 1 ? resp.Items[0] : null;
+}catch(error)
+{
+  console.log('Delete item failed: ', error);
+  return responseLib.failure({ message: error.message });
+}
+}
+
      
+
 

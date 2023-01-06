@@ -39,6 +39,7 @@ provider:
     NODE_ENV: ${file(./.env.yml):${opt:stage, self:provider.stage}.NODE_ENV}
     STAGE: ${opt:stage, self:provider.stage}
     TASK_TABLE: ${opt:stage, self:provider.stage}-tsa-tasks
+    TIME_CARD_TABLE: ${opt:stage, self:provider.stage}-time-card
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -67,18 +68,33 @@ provider:
 functions:
 # Time Tasks
   createTask:
-    handler: Tasks/handler.createTask
+    handler: handlers/tasks.createTask
     events:
       - http:
           path: tasks
           method: post
           cors: ${self:custom.cors-config}
   deleteTask:
-    handler: Tasks/handler.deleteTask
+    handler: handlers/tasks.deleteTask
     events:
       - http:
           path: tasks/{TaskId}
           method: delete
+          cors: ${self:custom.cors-config}
+# TimeCards
+  createTimecard:
+    handler: handlers/timecards.createTimecard
+    events:
+      - http:
+          path: timecard
+          method: post
+          cors: ${self:custom.cors-config}
+  listUserTimecards:
+    handler: handlers/timecards.listUserTimecards
+    events:
+      - http:
+          path: /{UserId}/timecard
+          method: get
           cors: ${self:custom.cors-config}
 resources:
   Resources:
@@ -99,6 +115,23 @@ resources:
         TableName: ${opt:stage, self:provider.stage}-tsa-tasks
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES          
+# TimeCard
+    TimeCardDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: TimeCardId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: TimeCardId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${opt:stage, self:provider.stage}-time-card
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
   # Users
     TSAUsersDynamoDbTable:
       Type: AWS::DynamoDB::Table
