@@ -1,0 +1,73 @@
+	
+# Service name
+service: serverless-template
+
+app: serverless-template
+custom:
+  serverless-offline:
+    httpPort: 4000
+    useChildProcesses: true
+provider:
+  name: aws
+  stage: dev
+  region: eu-west-2
+  profile: se-demo #This is the name of the AWS profile saved locally
+  stackName: serverless-${opt:stage, self:provider.stage}-${self:service}-deployment
+  runtime: nodejs14.x
+  memorySize: 8192
+  lambdaHashingVersion: '20201221'
+  versionFunctions: false
+  tracing:
+    lambda: true
+  logRetentionInDays: 7
+  timeout: 30
+  environment:
+    NODE_ENV: ${file(./.env.yml):${opt:stage, self:provider.stage}.NODE_ENV}
+    STAGE: ${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource:
+        - '*'      
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource:
+        - '*'        
+  prune:
+    automatic: true
+    number: 1
+  cors-config:
+    origins:
+      - '*'
+    headers:
+      - Content-Type
+      - X-Amz-Date
+      - Authorization
+      - X-Api-Key
+      - X-Amz-Security-Token
+      - X-Amz-User-Agent
+    allowCredentials: false
+functions:
+  testLambda:
+    handler: handler.testLambda
+    events:
+      - http:
+          path: serverless-template/testlambda
+          method: get
+          cors: ${self:custom.cors-config}
+package:
+  exclude:
+    - .nyc_output/**
+    - coverage/**
+    - test/**
+    - .git/**
+    - serverless.yml
+    - .serverless/**
+    - requests/**
+    - node_modules/puppeteer/.local-chromium/**
+plugins:
+  - serverless-offline
+  - serverless-prune-plugin
+  - serverless-plugin-common-excludes
