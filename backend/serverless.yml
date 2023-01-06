@@ -73,6 +73,13 @@ functions:
           path: tasks
           method: post
           cors: ${self:custom.cors-config}
+  deleteTask:
+    handler: Tasks/handler.deleteTask
+    events:
+      - http:
+          path: tasks/{TaskId}
+          method: delete
+          cors: ${self:custom.cors-config}
 resources:
   Resources:
     # Time Tasks

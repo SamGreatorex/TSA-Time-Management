@@ -31,3 +31,22 @@ module.exports.createTask = async (event, context, callback) => {
      }
   };
 
+  module.exports.deleteTask = async (event, context, callback) => {
+
+    //#region Validation
+    try{
+     //Authenticate 
+     await auth.authenticateRequest(event,null,['TaskId']);
+
+    //#endregion
+  
+ //Create item
+    const pathParameters = event.pathParameters;
+     let response = await dynamo.dynamoDeleteItem(taskTable, 'TaskId', pathParameters.TaskId);
+     console.log('Dynamo deleted response.', response);
+        return responseLib.success(response.body);
+      } catch (error) {
+        console.log('Error', error);
+        return responseLib.failure(error.statusCode.status, error.statusCode.message);
+      }
+   };

@@ -29,22 +29,22 @@ module.exports.dynamoCreateItem = async (tableName, data)  => {
   }
 }
 
-module.exports.dynamoDeleteItem = async (tableName, itemId)  => {
+module.exports.dynamoDeleteItem = async (tableName, itemIdName, itemIdValue)  => {
 
 
-    console.log(`Creating item in table ${tableName}`);
+    console.log(`Deleting ${itemIdName}: ${itemIdValue} from table: ${tableName}`);
 
   try
   {
     let params = {
-        TableName: eventConnectionTable,
+        TableName: tableName,
         Key: {
-          connectionId: event.requestContext.connectionId,
+          [itemIdName]: itemIdValue,
         },
       };
       await dynamoDb.delete(params).promise();
-       console.log(`Deleted Item ${itemId} from table ${tableName}`);
-    return responseLib.success(`Deleted Item ${itemId} from table ${tableName}`);
+       console.log(`Deleted ${itemIdName}:${itemIdValue} from table ${tableName}`);
+    return responseLib.success(`Deleted Item ${itemIdValue} from table ${tableName}`);
   }catch(error)
   {
     console.log('Delete item failed: ', error);

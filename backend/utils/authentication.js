@@ -14,6 +14,7 @@ module.exports.authenticateRequest = async (event, headers, params, qsParams)  =
 //Authenticate Headers
 if(headers)
 {
+  console.log('Checking Event Headers', headers, event.headers);
     const eventHeaders = event.headers; 
     for (let i = 0; i < headers.length; i++) {
         let _header = headers[i];
@@ -30,6 +31,7 @@ if(headers)
 //Authenticate Params
 if(params)
 {
+  console.log('Checking Path parameters', params, event.pathParameters);
     const eventParams = event.pathParameters;
     for (let i = 0; i < params.length; i++) {
         let _param = params[i];
@@ -44,7 +46,8 @@ if(params)
 
 if(qsParams)
 {
-    const _qsParams = event.pathParameters;
+  console.log('Checking QS parameters', qsParams, event.pathParameters);
+    const _qsParams = event.queryStringParameters;
     for (let i = 0; i < qsParams.length; i++) {
         let _param = qsParams[i];
         if (!_qsParams.hasOwnProperty(_param)) {
