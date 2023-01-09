@@ -52,10 +52,9 @@ module.exports.dynamoDeleteItem = async (tableName, itemIdName, itemIdValue)  =>
   }
 }
 
-module.exports.dynamoScan = async (tableName, FilterExpression, ExpressionAttributeNames, ExpressionAttributeValues)  => {
+module.exports.dynamoScan = async (tableName, FilterExpression, ExpressionAttributeNames, ExpressionAttributeValues, ProjectionExpression)  => {
 
-
-  // console.log(`Deleting ${itemIdName}: ${itemIdValue} from table: ${tableName}`);
+// console.log(`Deleting ${itemIdName}: ${itemIdValue} from table: ${tableName}`);
 
 try
 {
@@ -63,13 +62,24 @@ try
     TableName: tableName,
     FilterExpression,
     ExpressionAttributeNames,
-    ExpressionAttributeValues
+    ExpressionAttributeValues,
+    ProjectionExpression
   };
   // logger.info('Getting data using params: ' + JSON.stringify(params, null, 2));
-  const resp = await dynamoDb.scan(params).promise();
+  const requests = await dynamoDb.scan(params).promise();
 
-   console.log(`Items Found:`, resp);
-   return resp && Array.isArray(resp.Items) && resp.Items.length === 1 ? resp.Items[0] : null;
+    while (requests.LastEvaluatedKey) {
+      // console.log('Scanning for more...');
+      params.ExclusiveStartKey = requests.LastEvaluatedKey;
+      let moreRequests = await dynamo.scan(params).promise();
+      // console.log('Returning more requests...:', moreRequests.Items.length);
+      requests.Items = requests.Items.concat(moreRequests.Items);
+      // console.log('More Requests Last Evaluated Key:', moreRequests.LastEvaluatedKey);
+      requests.LastEvaluatedKey = moreRequests.LastEvaluatedKey;
+    }
+
+   //console.log(`Items Found:`, requests.Items);
+   return requests.Items || [];
 }catch(error)
 {
   console.log('Delete item failed: ', error);

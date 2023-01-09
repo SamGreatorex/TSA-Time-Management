@@ -8,11 +8,11 @@ import {bindActionCreators } from 'redux';
 
   useEffect(() => {
 
-    console.log('Setting timecards', timecards);
+    console.log('Timecards Loaded', timecards);
 
     if(!timecards) actions.getUserTimecards('samg');
 
-  }, []);
+  }, [timecards]);
 
     return (
         <div>
