@@ -12,7 +12,8 @@
     "dependencies": {
         "aws-sdk": "^2.917.0",
         "http-proxy": "^1.0.0",
-        "react-scripts": "^2.1.8"
+        "react-scripts": "^2.1.8",
+        "uuid": "^9.0.0"
     },
     "devDependencies": {
         "serverless-offline": "^8.0.0",

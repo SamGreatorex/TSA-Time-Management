@@ -15,4 +15,15 @@ const getBackendURL = () => {
     };
     
   
-  
+    
+    export const taskTypes = [
+      { value: 'Admin', label: 'Admin' },
+      { value: 'NMT', label: 'NMT' },
+      { value: 'Level Up', label: 'Level Up' },
+      { value: 'Preparation, doc, design', label: 'Preparation, doc, design' },
+      { value: 'Equipment assessment, testing, demo', label: 'Equipment assessment, testing, demo' },
+      { value: 'Setup, Event, Tear down', label: 'Setup, Event, Tear down' },
+      { value: 'TMR', label: 'TMR' },
+    ];
+    
+    
