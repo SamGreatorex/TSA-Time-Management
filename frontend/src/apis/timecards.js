@@ -23,3 +23,23 @@ import globals from '../utils/globals';
       handleError(error);
     }
   };
+
+  export const postTimecard = async (timecard) => {
+    console.log('updating Timecard()');
+
+    try {
+
+      let result = await axios({
+        url: `${globals.BACKEND_URL}/timecard`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: JSON.stringify(timecard)
+      });
+      return handleResponse(result);
+    } catch (error) {
+      console.error("error for api ", error);
+      handleError(error);
+    }
+  };
