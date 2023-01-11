@@ -1,4 +1,4 @@
-import { GET_TIMECARDS, UPDATE_TIMECARDS, GET_TASKS} from "../actions/timecards";
+import { GET_TIMECARDS, UPDATE_TIMECARDS, GET_TASKS, UPDATE_TASK, DELETE_TASK} from "../actions/timecards";
 
   
 const initState = {
@@ -39,7 +39,33 @@ const timecards = (state = initState, action) => {
         ...state,
         tasks: [...action.tasks],
       };
-    default:
+    case UPDATE_TASK:
+        console.log('Updating the tasks');
+
+       let existingTask = [...state.tasks];
+        let allTasks = []; 
+       //if it already exists then remove it
+        if(existingTask?.find(x=>x.TaskId === action.TaskId)){
+          allTasks = existingTask.filter(x=>x.TaskId !== action.TaskId)
+        }else
+        {
+          allTasks = [...existingTask];
+        }
+        return {
+          ...state,
+          tasks: [...allTasks, action.task],
+        };
+    case DELETE_TASK:
+         let _tasks = [...state.tasks].filter(x=>x.TaskId !== action.taskId);
+         
+          return {
+            ...state,
+            tasks: _tasks,
+          };
+      
+      
+    
+        default:
       return state;
   }
   

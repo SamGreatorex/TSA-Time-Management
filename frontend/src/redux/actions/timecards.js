@@ -4,6 +4,8 @@ import * as tasksApi from '../../apis/tasks';
 export const GET_TIMECARDS = 'GET_TIMECARDS';
 export const UPDATE_TIMECARDS = 'UPDATE_TIMECARDS';
 export const GET_TASKS = 'GET_TASKS';
+export const UPDATE_TASK = 'UPDATE_TASK';
+export const DELETE_TASK = 'DELETE_TASK';
 
   const getTimecardsSuccess = (usercards) => {
     return {
@@ -23,6 +25,19 @@ export const GET_TASKS = 'GET_TASKS';
     return {
       type: GET_TASKS,
       tasks
+    };
+  }
+
+  const postTaskSuccess = (task) => {
+    return {
+      type: UPDATE_TASK,
+      task
+    };
+  }
+  const deleteTaskSuccess = (taskId) => {
+    return {
+      type: DELETE_TASK,
+      taskId
     };
   }
 
@@ -67,6 +82,29 @@ export const GET_TASKS = 'GET_TASKS';
     };
   };
 
-
-  export { getUserTimecards, updateTimecard, getTasks };
+  const updateTasks = (task) => {
+    return async (dispatch) => {
+      try {
+      
+        await tasksApi.postTask(task);
+        dispatch(postTaskSuccess(task));
+        
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  };
+  const deleteTask = (task) => {
+    return async (dispatch) => {
+      try {
+      
+        await tasksApi.deleteTask(task.TaskId);
+        dispatch(deleteTaskSuccess(task.TaskId));
+        
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  };
+  export { getUserTimecards, updateTimecard, getTasks, updateTasks, deleteTask};
 

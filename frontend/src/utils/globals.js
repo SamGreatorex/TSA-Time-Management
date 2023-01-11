@@ -10,7 +10,7 @@ const getBackendURL = () => {
         return 'https://ofytpkmiue.execute-api.eu-west-2.amazonaws.com/prod';
       }else
       {
-        return 'http://localhost:4000';
+        return 'http://localhost:4000/dev';
       } 
   }
   
