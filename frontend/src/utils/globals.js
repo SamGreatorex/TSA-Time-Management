@@ -1,17 +1,37 @@
 const getBackendURL = () => {
 
-    if (window.location.href.indexOf("localhost") > -1) {
-      console.log('Setting backend URL as http://localhost:4000/dev');
-      return 'http://localhost:4000/dev';
-    }else
-    {
-      console.log('Setting backend URL as https://5n19gk22j9.execute-api.eu-west-2.amazonaws.com/dev');
-      return 'https://5n19gk22j9.execute-api.eu-west-2.amazonaws.com/dev'
-    }
+  const host = window.location.host;
+  console.log('Host is:', host);
+    if (host === "time-management-frontend-dev.s3-website.eu-west-2.amazonaws.com") {
+      console.log('Setting Dev URL - https://pm2vq48up3.execute-api.eu-west-2.amazonaws.com/dev');
+      return 'https://pm2vq48up3.execute-api.eu-west-2.amazonaws.com/dev';
+    }else if (host === "time-management-frontend-prod.s3-website.eu-west-2.amazonaws.com") {
+      console.log('Setting Prod URL - https://ofytpkmiue.execute-api.eu-west-2.amazonaws.com/prod');
+        return 'https://ofytpkmiue.execute-api.eu-west-2.amazonaws.com/prod';
+      }else
+      {
+        return 'http://localhost:4000';
+      } 
   }
   
+  const getEnvironment = () => {
+
+    const host = window.location.host;
+    console.log('Host is:', host);
+    if (host === "time-management-frontend-dev.s3-website.eu-west-2.amazonaws.com") {
+      return 'dev';
+    }else if (host === "time-management-frontend-prod.s3-website.eu-west-2.amazonaws.com") {
+      
+        return 'prod';
+      }else
+      {
+        return 'localhost';
+      } 
+    }
+
   export default {
-      BACKEND_URL: getBackendURL()
+      BACKEND_URL: getBackendURL(),
+      ENV: getEnvironment()
     };
     
   

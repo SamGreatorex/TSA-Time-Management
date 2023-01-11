@@ -26,7 +26,11 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change && aws cloudfront create-invalidation --distribution-id E9PFZHO3TM9U1 --paths /release.json / /* --profile se-demo"
+    "predeploy:dev": "node on-build.js && yarn && yarn build",
+    "deploy:dev": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change --stage dev && aws cloudfront create-invalidation --distribution-id E33SGAV1OTHKK5 --paths /release.json",
+    "predeploy:prod": "node on-build.js && yarn && yarn build",
+    "deploy:prod": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change --stage prod && aws cloudfront create-invalidation --distribution-id E1NQEDBSFD66RO --paths /release.json"
+  
   },
   "eslintConfig": {
     "extends": [

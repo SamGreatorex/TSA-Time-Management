@@ -3,8 +3,9 @@ import {Select, Row, Col, Space, Tooltip, Button,Table, Input, Modal, Form} from
 import * as tcActions from '../../redux/actions/timecards';
 import { connect} from 'react-redux';
 import {bindActionCreators } from 'redux';
-import moment from 'moment';
+import moment, { parseZone } from 'moment';
 import { v4 as uuid } from 'uuid';
+
 
 
 const { Option } = Select;
@@ -94,11 +95,11 @@ const { Option } = Select;
       }
   ];
 
-  const OnStartTask = (record) => {
+  const OnStartTask = async (record) => {
     console.log('Starting Task', record);
-
+    let existingTask = await getExistingTask(record.TaskId);
+  
     //check if task already exists
-    let existingTask = currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId);
     let newTask = {
         StartTime: moment().toISOString(),
         totalDuration: "",
@@ -107,16 +108,20 @@ const { Option } = Select;
         _totalDuration: existingTask ? existingTask.totalDuration : 0
     };
     onUpdateTask(newTask);
-
   }
   const OnDescriptionChanged = (record) => {
     console.log('Description Task', record);
   }
 
+  const getExistingTask = async (taskId) => {
+    let existingTask = {...currentTimecard.Tasks?.find(x=>x.TaskId === taskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString()))};
+    return existingTask;
+  }
+
   const OnEndTask = async (record) => {
     console.log('Ending Task', record);
 
-    let task = {...currentTimecard.Tasks.find(x=>x.TaskId === record.TaskId)};
+    let task = await getExistingTask(record.TaskId);
 
 
     let startDate = await formatDate(moment(task.StartTime));
@@ -133,7 +138,7 @@ const { Option } = Select;
 
     delete task._totalDuration;
     task.totalDuration = minutes;
-    task.Notes = tcDescription;
+    task.Notes = task.Notes ? task.Notes + " - " + tcDescription : tcDescription;
     console.log('Updated Task', task)
     await onUpdateTask(task)
 
@@ -162,15 +167,17 @@ const { Option } = Select;
 
   const onUpdateTask = async (task) => {
     
-    let updatedTasks = currentTimecard.Tasks?.find(x=>x.TaskId === task.TaskId) 
-    ? [...currentTimecard.Tasks.filter(x=>x.TaskId !== task.TaskId)] 
+    let existingTask = await getExistingTask(task.TaskId);
+    console.log('Existing Task Found', existingTask)
+    let updatedTasks = existingTask
+    ? [...currentTimecard.Tasks.filter(x=> !(x.TaskId === existingTask.TaskId && x.StartTime === existingTask.StartTime))] 
     : [...currentTimecard.Tasks];
-    updatedTasks.push(task);  
+    updatedTasks = [...updatedTasks, task];  
 
      let updatedTimeCard = {...currentTimecard};
      updatedTimeCard.Tasks = updatedTasks;
-     console.log()
-     actions.updateTimecard(updatedTimeCard);
+   
+    actions.updateTimecard(updatedTimeCard);
   }
 
   const onCreateWeeksCard = async () => {

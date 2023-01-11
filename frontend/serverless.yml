@@ -2,7 +2,7 @@ service: time-management-frontend
 provider:
   name: aws
   stage: dev
-  profile: se-demo
+  profile: aws-dev-user
   region: eu-west-2
 custom:
   client:
