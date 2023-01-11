@@ -51,6 +51,19 @@ provider:
         - lambda:InvokeFunction
       Resource:
         - '*'        
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - 'arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-time-card'      
+        - 'arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-tasks'
+        - 'arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-users'
   prune:
     automatic: true
     number: 1
@@ -153,7 +166,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: tsa-users-${opt:stage, self:provider.stage}
+        TableName: ${opt:stage, self:provider.stage}-tsa-users
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES
 package:

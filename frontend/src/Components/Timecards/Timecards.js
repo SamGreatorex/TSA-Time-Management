@@ -32,7 +32,6 @@ const { Option } = Select;
       setCurrentTimecard(cTimeCard);
   }, [timecards]);
 
-
   const timeCardsTasks = [
     {
         key: 'taskId',
