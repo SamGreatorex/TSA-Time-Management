@@ -40,10 +40,28 @@ const getBackendURL = () => {
       { value: 'Admin', label: 'Admin' },
       { value: 'NMT', label: 'NMT' },
       { value: 'Level Up', label: 'Level Up' },
+      { value: 'Quarterly Tech Summits', label: 'Quarterly Tech Summits'},
+      { value: 'Everest', label: 'Everest'},
       { value: 'Preparation, doc, design', label: 'Preparation, doc, design' },
       { value: 'Equipment assessment, testing, demo', label: 'Equipment assessment, testing, demo' },
       { value: 'Setup, Event, Tear down', label: 'Setup, Event, Tear down' },
       { value: 'TMR', label: 'TMR' },
+      { value: 'Product Release Trainings', label: 'Product Release Trainings' },
+      { value: 'Process Optimization', label: 'Process Optimization' },
+      { value: 'Creating Training Material', label: 'Creating Training Material' },
+      { value: 'Dragon Team Meetings', label: 'Dragon Team Meetings' },
+      { value: 'Vivun / JIRA Processing', label: 'Vivun / JIRA Processing' },
+      { value: 'FR Escalations', label: 'TFR Escalations' },
+      { value: 'Roadmap / New Product Presentations', label: 'Roadmap / New Product Presentations' },
+      { value: 'Technical Escalations / Troubleshooting', label: 'Technical Escalations / Troubleshooting' },
+      { value: 'Demos', label: 'Demos' },
+      { value: 'Feature pre-release testing', label: 'Feature pre-release testing' },
+      { value: 'Beta support', label: 'Beta support' },
+      { value: 'Internal documentation', label: 'Internal documentation' },
+      { value: 'External documentation', label: 'External documentation' },
+      { value: 'Non-SE Enablement (insights, support etc)', label: 'Non-SE Enablement (insights, support etc)' },
+      { value: 'RFP’s', label: 'RFP’s' },
+      { value: 'ZoomTopia', label: 'ZoomTopia' }
     ];
     
     
