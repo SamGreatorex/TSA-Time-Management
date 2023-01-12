@@ -46,3 +46,10 @@ export function getRedirectUrl() {
   const redirectUrl =  queryParams.get('redirect_uri');
   return redirectUrl;
 }
+
+export async function convertMinToStringTime(minutes){
+  console.log(`Converting ${minutes} to time display`)
+  let hrs = Math.floor(minutes / 60);
+  let min = minutes - (hrs * 60);
+  return `${hrs}hrs ${min}min`;
+}

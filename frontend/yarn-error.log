@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/bin/yarn add reduc
+  /usr/local/bin/node /usr/local/bin/yarn add antd/dist/antd.css
 
 PATH: 
   /Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Frameworks/Python.framework/Versions/3.11/bin:/opt/homebrew/bin:/opt/homebrew/sbin
@@ -14,8 +14,8 @@ Platform:
   darwin arm64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/reduc: Not found
-      at params.callback [as _callback] (/usr/local/lib/node_modules/yarn/lib/cli.js:66145:18)
+  Error: https://registry.yarnpkg.com/antd%2fdist/antd.css: Request "https://registry.yarnpkg.com/antd%2fdist/antd.css" returned a 405
+      at params.callback [as _callback] (/usr/local/lib/node_modules/yarn/lib/cli.js:66154:18)
       at self.callback (/usr/local/lib/node_modules/yarn/lib/cli.js:140890:22)
       at Request.emit (node:events:513:28)
       at Request.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:141862:10)
@@ -32,18 +32,22 @@ npm manifest:
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+      "@reduxjs/toolkit": "^1.9.1",
       "@testing-library/jest-dom": "^5.16.5",
       "@testing-library/react": "^13.4.0",
       "@testing-library/user-event": "^13.5.0",
       "antd": "^5.1.2",
       "axios": "^1.2.2",
+      "moment": "^2.29.4",
       "react": "^18.2.0",
       "react-dom": "^18.2.0",
       "react-redux": "^8.0.5",
       "react-router": "^6.6.1",
       "react-router-dom": "^6.6.1",
       "react-scripts": "5.0.1",
+      "redux": "^4.2.0",
       "serverless-finch": "^4.0.0",
+      "uuid": "^9.0.0",
       "web-vitals": "^2.1.4"
     },
     "scripts": {
@@ -51,7 +55,11 @@ npm manifest:
       "build": "react-scripts build",
       "test": "react-scripts test",
       "eject": "react-scripts eject",
-      "deploy": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change && aws cloudfront create-invalidation --distribution-id E9PFZHO3TM9U1 --paths /release.json / /* --profile se-demo"
+      "predeploy:dev": "node on-build.js && yarn && yarn build",
+      "deploy:dev": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change --stage dev && aws cloudfront create-invalidation --distribution-id E33SGAV1OTHKK5 --paths /release.json",
+      "predeploy:prod": "node on-build.js && yarn && yarn build",
+      "deploy:prod": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change --stage prod && aws cloudfront create-invalidation --distribution-id E1NQEDBSFD66RO --paths /release.json"
+    
     },
     "eslintConfig": {
       "extends": [
@@ -1743,6 +1751,16 @@ Lockfile:
       classnames "^2.3.2"
       rc-trigger "^5.3.4"
       rc-util "^5.24.4"
+  
+  "@reduxjs/toolkit@^1.9.1":
+    version "1.9.1"
+    resolved "https://registry.yarnpkg.com/@reduxjs/toolkit/-/toolkit-1.9.1.tgz#4c34dc4ddcec161535288c60da5c19c3ef15180e"
+    integrity sha512-HikrdY+IDgRfRYlCTGUQaiCxxDDgM1mQrRbZ6S1HFZX5ZYuJ4o8EstNmhTwHdPl2rTmLxzwSu0b3AyeyTlR+RA==
+    dependencies:
+      immer "^9.0.16"
+      redux "^4.2.0"
+      redux-thunk "^2.4.2"
+      reselect "^4.1.7"
   
   "@remix-run/router@1.2.1":
     version "1.2.1"
@@ -5810,7 +5828,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.2.4.tgz#a291c0c6178ff1b960befe47fcdec301674a6324"
     integrity sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==
   
-  immer@^9.0.7:
+  immer@^9.0.16, immer@^9.0.7:
     version "9.0.17"
     resolved "https://registry.yarnpkg.com/immer/-/immer-9.0.17.tgz#7cfe8fbb8b461096444e9da7a5ec4a67c6c4adf4"
     integrity sha512-+hBruaLSQvkPfxRiTLK/mi4vLH+/VQS6z2KJahdoxlleFOI8ARqzOF17uy12eFDlqWmPoygwc5evgwcp+dlHhg==
@@ -7300,6 +7318,11 @@ Lockfile:
     integrity sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==
     dependencies:
       minimist "^1.2.6"
+  
+  moment@^2.29.4:
+    version "2.29.4"
+    resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+    integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
   
   ms@2.0.0:
     version "2.0.0"
@@ -9158,6 +9181,18 @@ Lockfile:
       indent-string "^4.0.0"
       strip-indent "^3.0.0"
   
+  redux-thunk@^2.4.2:
+    version "2.4.2"
+    resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.4.2.tgz#b9d05d11994b99f7a91ea223e8b04cf0afa5ef3b"
+    integrity sha512-+P3TjtnP0k/FEjcBL5FZpoovtvrTNT/UXd4/sluaSyrURlSlhLSzEdfsTBW7WsKB6yPvgd7q/iZPICFjW4o57Q==
+  
+  redux@^4.2.0:
+    version "4.2.0"
+    resolved "https://registry.yarnpkg.com/redux/-/redux-4.2.0.tgz#46f10d6e29b6666df758780437651eeb2b969f13"
+    integrity sha512-oSBmcKKIuIR4ME29/AeNUnl5L+hvBq7OaJWzaptTQJAntaPvxIJqfnjbaEiCzzaIz+XmVILfqAM3Ob0aXLPfjA==
+    dependencies:
+      "@babel/runtime" "^7.9.2"
+  
   regenerate-unicode-properties@^10.1.0:
     version "10.1.0"
     resolved "https://registry.yarnpkg.com/regenerate-unicode-properties/-/regenerate-unicode-properties-10.1.0.tgz#7c3192cab6dd24e21cb4461e5ddd7dd24fa8374c"
@@ -9255,6 +9290,11 @@ Lockfile:
     version "1.0.0"
     resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
     integrity sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==
+  
+  reselect@^4.1.7:
+    version "4.1.7"
+    resolved "https://registry.yarnpkg.com/reselect/-/reselect-4.1.7.tgz#56480d9ff3d3188970ee2b76527bd94a95567a42"
+    integrity sha512-Zu1xbUt3/OPwsXL46hvOOoQrap2azE7ZQbokq61BQfiXvhewsKDwhMeZjTX9sX0nvw1t/U5Audyn1I9P/m9z0A==
   
   resize-observer-polyfill@^1.5.1:
     version "1.5.1"
@@ -10494,6 +10534,11 @@ Lockfile:
     version "8.3.2"
     resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
     integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+  
+  uuid@^9.0.0:
+    version "9.0.0"
+    resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+    integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
   
   v8-to-istanbul@^8.1.0:
     version "8.1.1"
