@@ -108,9 +108,6 @@ const { Option } = Select;
     };
     onUpdateTask(newTask);
   }
-  const OnDescriptionChanged = (record) => {
-    console.log('Description Task', record);
-  }
 
   const getExistingTask = async (taskId) => {
     let existingTask = {...currentTimecard.Tasks?.find(x=>x.TaskId === taskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString()))};
@@ -205,7 +202,7 @@ const { Option } = Select;
               Start Week: 
             </Col>
             <Col>
-              <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={OnTimeCardChanged}>
+              <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={OnTimeCardChanged} defaultValue={()=>  moment().startOf('isoWeek').format('Do MMM YY')}>
                   {lTimecards.map((tc) => (
                     <Option key={tc.TimeCardId}>{moment(tc.StartDate).format('Do MMM YY')}</Option>
                   ))}
@@ -248,7 +245,7 @@ const { Option } = Select;
       <Form name="createTask" labelCol={{ span: 8, }} wrapperCol={{ span: 16, }} form={form} onFinish={onCreateTask}>
       <Form.Item label="Task Type" name="type" rules={[{required: true, message: 'Please select a type!'}]}>
       <Select style={{ width: '300px' }}>
-          {tasks?.filter(x=> !x.Default).map((tc) => (
+          {tasks?.map((tc) => (
             <Option key={tc.TaskId}>{tc.Type} - {tc.Name}</Option>
           ))}
         </Select>

@@ -1,0 +1,72 @@
+[
+    {
+        "UserId": "samg",
+        "AvailableTasks": [
+            {
+                "Type": "Admin",
+                "TaskId": "fe64d866-1916-4c3f-b788-bda07c987a1c",
+                "Default": true,
+                "Name": "Internal Meetings"
+            },
+            {
+                "Type": "Admin",
+                "TaskId": "0d1fb4e5-ed6c-4ffe-b4b1-54f6c2e24ddb",
+                "Default": true,
+                "Name": "General Admin"
+            },
+            {
+                "Type": "Admin",
+                "TaskId": "b84e4b65-f764-4745-975c-5639906ebbbb",
+                "Default": false,
+                "Name": "Time Management App"
+            },
+            {
+                "Type": "TMRs",
+                "TaskId": "3b9d7647-0091-455c-82a4-e37939fc8e13",
+                "Default": false,
+                "Name": "WGS Meeting SDK"
+            }
+        ],
+        "StartDate": "Mon Jan 09 2023 00:00:00 GMT+0000",
+        "TimeCardId": "f342147a-1479-47f9-94f2-8bd33f975f57",
+        "EndDate": "Sun Jan 15 2023 23:59:59 GMT+0000",
+        "Tasks": [
+            {
+                "StartTime": "2023-01-09T16:09:55.043Z",
+                "totalDuration": 405,
+                "TaskId": "b84e4b65-f764-4745-975c-5639906ebbbb",
+                "Notes": "Development"
+            },
+            {
+                "StartTime": "2023-01-09T16:10:06.667Z",
+                "totalDuration": 60,
+                "TaskId": "fe64d866-1916-4c3f-b788-bda07c987a1c",
+                "Notes": "Ras Update on Bett - PMM team meeting"
+            },
+            {
+                "StartTime": "2023-01-09T16:20:30.350Z",
+                "totalDuration": 15,
+                "TaskId": "0d1fb4e5-ed6c-4ffe-b4b1-54f6c2e24ddb",
+                "Notes": "Emails"
+            },
+            {
+                "StartTime": "2023-01-10T16:40:41.482Z",
+                "totalDuration": 30,
+                "TaskId": "0d1fb4e5-ed6c-4ffe-b4b1-54f6c2e24ddb",
+                "Notes": "Emails - Meeting 2"
+            },
+            {
+                "StartTime": "2023-01-10T16:42:17.221Z",
+                "totalDuration": 15,
+                "TaskId": "3b9d7647-0091-455c-82a4-e37939fc8e13",
+                "Notes": "Prototype Testing"
+            },
+            {
+                "StartTime": "2023-01-10T20:33:21.615Z",
+                "totalDuration": 30,
+                "TaskId": "fe64d866-1916-4c3f-b788-bda07c987a1c",
+                "Notes": "Marketplace Apps Meeting"
+            }
+        ]
+    }
+]

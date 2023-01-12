@@ -8,6 +8,9 @@ import HeaderBar from './Components/HeaderBar/header';
 import 'antd/dist/reset.css';
 import { Provider } from "react-redux";
 import store from "./redux/store";
+import DailyReport from './Components/Reports/dailyReport';
+import WeeklyReport from './Components/Reports/weeklyReport';
+import MonthlyReport from './Components/Reports/monthlyReport';
 
 function App() {
   return (
@@ -19,6 +22,9 @@ function App() {
               <Route exact path='/' element={<Home/>} />
               <Route path='/tasks' element={<Tasks/>} />
               <Route path='/timecards' element={<TimeCards/>} />
+              <Route path='/reports-daily' element={<DailyReport/>} />
+              <Route path='/reports-weekly' element={<WeeklyReport/>} />
+              <Route path='/reports-monthly' element={<MonthlyReport/>} />
           </Routes>
         </div>
       </Router>
