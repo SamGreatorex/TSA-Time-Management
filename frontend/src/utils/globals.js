@@ -61,7 +61,7 @@ const getBackendURL = () => {
       { value: 'External documentation', label: 'External documentation' },
       { value: 'Non-SE Enablement (insights, support etc)', label: 'Non-SE Enablement (insights, support etc)' },
       { value: 'RFP’s', label: 'RFP’s' },
-      { value: 'ZoomTopia', label: 'ZoomTopia' }
+      { value: 'Event Prep', label: 'Event Prep' }
     ];
     
     
