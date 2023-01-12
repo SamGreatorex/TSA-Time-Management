@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Select, Row, Col, Table, Typography} from 'antd';
+import {Select, Row, Col, Table, Typography, Space} from 'antd';
 import * as tcActions from '../../redux/actions/timecards';
 import { connect} from 'react-redux';
 import {bindActionCreators } from 'redux';
@@ -8,21 +8,20 @@ import { convertMinToStringTime } from '../../utils/utils';
 
 const { Option } = Select;
 const { Text } = Typography;
-function DailyReport({actions, timecards}) {
+function DailyReport({actions, timecards, tasks}) {
 
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([]);
   const [weeksTimecard, setWeeksTimecard] = useState([]);
-const startDate = "12th Jan 23";
+
   useEffect(() => {
-    console.log('Timecards', timecards, timecards.length);
     if(timecards.length === 0) {
         actions.getUserTimecards('samg');
+        actions.getTasks();
     }else
     {
         resetData(moment());
     }
-
   }, []);
 
   useEffect(() => {
@@ -68,6 +67,30 @@ const startDate = "12th Jan 23";
         dataIndex: 'TaskId',
         fixed: true,
         width: 350
+      },
+      {
+        title: 'Task Name',
+        key: 'taskName',
+        align: 'center',
+        render:  (record) => {
+            return (
+              <Space direction="vrtical">
+                {tasks?.find(x=>x.TaskId === record.TaskId)?.Name ?? ""}
+                </Space>
+            );
+          },
+      },
+      {
+        title: 'Task Type',
+        key: 'TaskType',
+        align: 'center',
+        render:  (record) => {
+            return (
+              <Space direction="vrtical">
+                {tasks?.find(x=>x.TaskId === record.TaskId)?.Type ?? ""}
+                </Space>
+            );
+          },
       },
       {
         title: 'Duration',
@@ -119,7 +142,7 @@ const startDate = "12th Jan 23";
                         <>
                           <Table.Summary.Row>
                             <Table.Summary.Cell>Total Duration</Table.Summary.Cell>
-                            <Table.Summary.Cell colSpan={2}>
+                            <Table.Summary.Cell colSpan={4}>
                               <Text type="danger">{display}</Text>
                             </Table.Summary.Cell>
                           </Table.Summary.Row>
@@ -135,7 +158,8 @@ const startDate = "12th Jan 23";
 }
 function mapStateToProps(state) {
   return {
-  timecards: state.timecards.usercards
+  timecards: state.timecards.usercards,
+  tasks: state.timecards.tasks
   };
 }
 
@@ -143,7 +167,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch)
+      getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch),
+      getTasks: bindActionCreators(tcActions.getTasks, dispatch)
     }
   };
 }
