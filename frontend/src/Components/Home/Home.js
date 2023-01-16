@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid';
 import Sider from 'antd/es/layout/Sider';
 
 function Home({actions, timecards, tasks}) {
-  const initSummary = {weekTimeLogged: "", dailyTimeLogged: ""}
+  const initSummary = {weekTimeLogged: "0", dailyTimeLogged: "0"}
   const [summaryData, setSummaryData] = useState(initSummary);
 
   
@@ -20,7 +20,7 @@ function Home({actions, timecards, tasks}) {
     console.log('timecards updated', timecards);
     let totalDailyHours = 0;
 
-    if(timecards.length > 0){
+    if(timecards?.length > 0){
       const cTimeCard = timecards.find(x=>moment(x.StartDate).toString() === moment().startOf('isoWeek').toString());
       const dailyTasks = cTimeCard?.Tasks?.filter(x=>(moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString()));
       console.log('Daily Tasks', dailyTasks);
@@ -28,9 +28,9 @@ function Home({actions, timecards, tasks}) {
       let totalWeeklyDuration = cTimeCard?.Tasks?.map(item => item.totalDuration).reduce((prev, next) => prev + next);
       let weekHrs = Math.floor(totalWeeklyDuration / 60);
       let weekMns = totalWeeklyDuration - (weekHrs * 60);
-      let totalWeeklyHours = `${weekHrs}hrs ${weekMns}min`
+      let totalWeeklyHours = `${weekHrs || 0}hrs ${weekMns || 0}min`
 
-      if(dailyTasks.length > 0)
+      if(dailyTasks && dailyTasks.length > 0)
       {
       let totalDailyDuration = dailyTasks.map(item => item.totalDuration).reduce((prev, next) => prev + next);
       let dilyHrs = Math.floor(totalDailyDuration / 60);
