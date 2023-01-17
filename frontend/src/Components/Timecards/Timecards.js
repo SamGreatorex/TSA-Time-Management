@@ -16,7 +16,7 @@ const { Option } = Select;
   const [lTimecards, setlTimecards] = useState([])
   const [currentTimecard, setCurrentTimecard] = useState(null)
   const [updatingTask, setUpdatingTask] = useState(false) 
-  const [tcDescription, setTCDescription] = useState(null) 
+  const [tcDescription, setTCDescription] = useState("") 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
 
   useEffect(() => {
@@ -67,7 +67,7 @@ const { Option } = Select;
               {currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && x.totalDuration === "") &&
                     <Row>
                       <Col span={20}>
-                        <TextArea rows={2} defaultValue={currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId).Notes} onChange={(e) => setTCDescription(e.target.value)}/>
+                        <TextArea rows={2} defaultValue={currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString())).Notes} onChange={(e) => setTCDescription(e.target.value)}/>
                         </Col>
                         <Col  span={4}>
                         <Button type="primary" onClick={() => OnEndTask(record)}>Submit</Button>
@@ -81,6 +81,8 @@ const { Option } = Select;
       }
   ];
 
+
+
   const OnStartTask = async (record) => {
     console.log('Starting Task', record);
     let existingTask = await getExistingTask(record.TaskId);
@@ -93,6 +95,7 @@ const { Option } = Select;
         Notes:  existingTask ? existingTask.Notes : "",
         _totalDuration: existingTask ? existingTask.totalDuration : 0
     };
+    setTCDescription(newTask.Notes);
     onUpdateTask(newTask);
     setUpdatingTask(true)
   }
