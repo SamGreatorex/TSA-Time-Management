@@ -95,7 +95,19 @@ function DailyReport({actions, timecards, tasks}) {
       {
         title: 'Duration',
         key: 'totalDuration',
-        dataIndex: 'totalDuration'
+        render:  (record) => {
+           const minutes = record.totalDuration;
+           console.log('Converting', minutes );
+           let hrs = Math.floor(minutes / 60);
+           let min = minutes - (hrs * 60);
+           const display =  `${hrs}hrs ${min}min`;
+           console.log('Display is', display );
+          return (
+            <Space direction="vertical">
+              {display}
+              </Space>
+          );
+        }
       },
       {
         title: 'Notes',
@@ -123,7 +135,7 @@ function DailyReport({actions, timecards, tasks}) {
                 style={{ marginTop: '4px', alignSelf:'center'}}
                 bordered
                 dataSource={data}
-                rowKey={(record) => record.TaskId}
+                rowKey={(record) => `${record.TaskId}|${record.StartTime}`}
                 columns={dataColumns}
                 pagination={{  
                   total: data ? data.length : 0,

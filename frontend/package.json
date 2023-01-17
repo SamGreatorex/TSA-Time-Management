@@ -30,7 +30,6 @@
     "deploy:dev": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change --stage dev && aws cloudfront create-invalidation --distribution-id E33SGAV1OTHKK5 --paths /release.json",
     "predeploy:prod": "node on-build.js && yarn && yarn build",
     "deploy:prod": "serverless client deploy --no-confirm --no-delete-contents --no-config-change --no-policy-change --no-cors-change --stage prod && aws cloudfront create-invalidation --distribution-id E1NQEDBSFD66RO --paths /release.json"
-  
   },
   "eslintConfig": {
     "extends": [
