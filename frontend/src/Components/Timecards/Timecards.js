@@ -7,7 +7,7 @@ import moment, { parseZone } from 'moment';
 import { v4 as uuid } from 'uuid';
 
 
-
+const { TextArea } = Input;
 const { Option } = Select;
 
  function Timecards({actions, timecards, tasks}) {
@@ -16,7 +16,7 @@ const { Option } = Select;
   const [lTimecards, setlTimecards] = useState([])
   const [currentTimecard, setCurrentTimecard] = useState(null)
   const [updatingTask, setUpdatingTask] = useState(false) 
-  const [tcDescription, setTCDescription] = useState("Something") 
+  const [tcDescription, setTCDescription] = useState(null) 
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
 
   useEffect(() => {
@@ -54,41 +54,28 @@ const { Option } = Select;
         key: 'actions',
         align: 'center',
         render:  (record) => {
+          console.log('Record is:', currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId))
             return (
-              <Space direction="vrtical">
+              <div>
                 {/* Only Show start button if no other task is in progress*/}
-    
               {!currentTimecard.Tasks?.find(x=> x.totalDuration === "") && !updatingTask  && 
                 <Tooltip title="Start Task">
                    <Button onClick={() =>OnStartTask(record)} type="primary">Start </Button>
                 </Tooltip>
-
-              }
-              
-             {/* Only Show end button if task is in progress*/}
-              {currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && x.totalDuration === "") && !updatingTask  &&
-                     <Tooltip title="End Task">
-                     <Button onClick={() => {
-                      setTCDescription(record.Notes);
-                      setUpdatingTask(true)
-                    }
-                      }> Stop </Button>
-                    </Tooltip>
               }
 
-              {currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && x.totalDuration === "") && updatingTask  &&
+              {currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && x.totalDuration === "") &&
                     <Row>
-                      <Col>
-                        <Input defaultValue={tcDescription} onChange={(e) => setTCDescription(e.target.value)}/>
+                      <Col span={20}>
+                        <TextArea rows={2} defaultValue={currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId).Notes} onChange={(e) => setTCDescription(e.target.value)}/>
                         </Col>
-                        <Col>
+                        <Col  span={4}>
                         <Button type="primary" onClick={() => OnEndTask(record)}>Submit</Button>
                         </Col>
                     </Row>
                  
-              }
-         
-                </Space>
+                }
+           </div>
             );
           },
       }
@@ -107,6 +94,7 @@ const { Option } = Select;
         _totalDuration: existingTask ? existingTask.totalDuration : 0
     };
     onUpdateTask(newTask);
+    setUpdatingTask(true)
   }
 
   const getExistingTask = async (taskId) => {
@@ -134,7 +122,7 @@ const { Option } = Select;
 
     delete task._totalDuration;
     task.totalDuration = minutes;
-    task.Notes = task.Notes ? task.Notes + " - " + tcDescription : tcDescription;
+    task.Notes =  tcDescription;
     console.log('Updated Task', task)
     await onUpdateTask(task)
 
