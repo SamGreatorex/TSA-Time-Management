@@ -108,11 +108,31 @@ function DailyReport({actions, timecards, tasks}) {
               </Space>
           );
         }
-      },
+       },
       {
         title: 'Notes',
         key: 'Notes',
-        dataIndex: 'Notes'
+        render:  (record) => {
+         return (
+           <Space direction="vertical">
+          {Array.isArray(record.Notes) ? 
+          (
+            record.Notes.map((note)=> {
+              let display = `${moment(note.StartTime).format('ddd Do HH:mm')} - (${note.duration}min) - ${note.note}`;
+              return <div>{display}</div>
+            })
+          )
+          :
+          (
+            <div>{moment(record.StartTime).format('ddd Do HH:mm')} - {record.totalDuration}min - {record.Notes}</div>
+            
+          )
+          }
+            </Space>
+            
+          
+         );
+       }
       }
     
   ];

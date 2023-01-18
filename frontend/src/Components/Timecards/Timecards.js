@@ -54,20 +54,21 @@ const { Option } = Select;
         key: 'actions',
         align: 'center',
         render:  (record) => {
-          console.log('Record is:', currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId))
+           let tc =  currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString())) || null;
+           const RecordUpdating = currentTimecard.Tasks?.find(x=>x.IsInProgress && x.IsInProgress === true);
             return (
               <div>
                 {/* Only Show start button if no other task is in progress*/}
-              {!currentTimecard.Tasks?.find(x=> x.totalDuration === "") && !updatingTask  && 
+              {!RecordUpdating && 
                 <Tooltip title="Start Task">
                    <Button onClick={() =>OnStartTask(record)} type="primary">Start </Button>
                 </Tooltip>
               }
 
-              {currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && x.totalDuration === "") &&
+              {RecordUpdating && tc?.IsInProgress === true &&
                     <Row>
                       <Col span={20}>
-                        <TextArea rows={2} defaultValue={currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString())).Notes} onChange={(e) => setTCDescription(e.target.value)}/>
+                        <TextArea rows={2} onChange={(e) => setTCDescription(e.target.value)}/>
                         </Col>
                         <Col  span={4}>
                         <Button type="primary" onClick={() => OnEndTask(record)}>Submit</Button>
@@ -84,20 +85,22 @@ const { Option } = Select;
 
 
   const OnStartTask = async (record) => {
-    console.log('Starting Task', record);
+
     let existingTask = await getExistingTask(record.TaskId);
-  
+    console.log('Starting Task', record, existingTask);
     //check if task already exists
     let newTask = {
-        StartTime: moment().toISOString(),
-        totalDuration: "",
+        StartTime: existingTask?.StartTime ? existingTask.StartTime : moment().toISOString(),
+        totalDuration: existingTask?.totalDuration ? existingTask.totalDuration : 0,
         TaskId: record.TaskId,
-        Notes:  existingTask ? existingTask.Notes : "",
-        _totalDuration: existingTask ? existingTask.totalDuration : 0
+        Notes:  existingTask?.Notes ? existingTask.Notes : [],
+        IsInProgress : true,
+        TaskStartTime: moment().toISOString()
     };
-    setTCDescription(newTask.Notes);
+    console.log('Starting new tasl', newTask);
     onUpdateTask(newTask);
-    setUpdatingTask(true)
+
+    //setUpdatingTask(true)
   }
 
   const getExistingTask = async (taskId) => {
@@ -109,23 +112,24 @@ const { Option } = Select;
     console.log('Ending Task', record);
 
     let task = await getExistingTask(record.TaskId);
+    let notes = [...task.Notes];
 
-
-    let startDate = await formatDate(moment(task.StartTime));
+    let startDate = await formatDate(moment(task.TaskStartTime));
     let endDate = await formatDate(moment());
     var duration = moment.duration(moment(endDate).diff(startDate));
     var minutes = duration.asMinutes() === 0 ? 15 : duration.asMinutes();
     console.log('Startdate ', startDate);
     console.log('endDate ', endDate);
 
-    
+    notes.push({StartTime: task.TaskStartTime, duration: minutes, note: tcDescription});
+   
     if(task._totalDuration) minutes = minutes + task._totalDuration;
 
+    delete task.TaskStartTime;
     console.log('Duration saving as ', duration);
-
-    delete task._totalDuration;
-    task.totalDuration = minutes;
-    task.Notes =  tcDescription;
+    task.totalDuration = task.totalDuration + minutes;
+    task.Notes =  notes;
+    task.IsInProgress = false;
     console.log('Updated Task', task)
     await onUpdateTask(task)
 

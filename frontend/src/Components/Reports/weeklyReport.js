@@ -14,7 +14,7 @@ function WeeklyReport({actions, timecards, tasks}) {
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([]);
   const [weeksTimecard, setWeeksTimecard] = useState([]);
-  const [groupByFunction, setGroupByFunction] = useState('All');
+  const [groupByFunction, setGroupByFunction] = useState('TaskType');
   const [currentDateFilter, setCurrentDateFilter] = useState(moment().startOf('isoWeek')); 
 
   useEffect(() => {
@@ -57,12 +57,21 @@ function WeeklyReport({actions, timecards, tasks}) {
     if(groupType === 'Task'){
       var result = [];
       allTasks.reduce(function(res, value) {
+        console.log('Looping Reducer', value, res);
         if (!res[value.TaskId]) {
-          res[value.TaskId] = { TaskId: value.TaskId, totalDuration: 0, Notes: '', StartTime: currentTimecard.StartDate};
+          res[value.TaskId] = { TaskId: value.TaskId, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
           result.push(res[value.TaskId])
         }
         res[value.TaskId].totalDuration += value.totalDuration;
-        res[value.TaskId].Notes += moment(value.StartTime).format('dddd Do') + ": " + value.Notes + '\n';
+        if(Array.isArray(value.Notes)){
+     
+          res[value.TaskId].Notes.push(...value.Notes);
+        }else
+        {
+          res[value.TaskId].Notes.push({StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
+        }
+  
+        console.log('Returning Notes', res, value);
         return res;
       }, {});
        allTasks = result;
@@ -74,11 +83,19 @@ function WeeklyReport({actions, timecards, tasks}) {
         let task = tasks.find(x=>x.TaskId === value.TaskId);
     
         if (!res[task.Type]) {
-          res[task.Type] = { TaskType: task.Type, totalDuration: 0, Notes: '', StartTime: currentTimecard.StartDate};
+          res[task.Type] = { TaskType: task.Type, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
           result.push(res[task.Type])
         }
         res[task.Type].totalDuration += value.totalDuration;
-        res[task.Type].Notes += `${moment(value.StartTime).format('dddd Do')}: ${value.Notes} (${task.Name})\n`;
+
+
+        //res[task.Type].Notes += `${moment(value.StartTime).format('dddd Do')}: ${value.Notes} (${task.Name})\n`;
+        if(Array.isArray(value.Notes)){
+          res[task.Type].Notes.push(...value.Notes);
+        }else
+        {
+          res[task.Type].Notes.push({StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
+        }
         return res;
       }, {});
       allTasks = result;
@@ -149,8 +166,28 @@ function WeeklyReport({actions, timecards, tasks}) {
       {
         title: 'Notes',
         key: 'Notes',
-        dataIndex: 'Notes'
-      }
+        render:  (record) => {
+          return (
+            <Space direction="vertical">
+           {Array.isArray(record.Notes) ? 
+           (
+             record.Notes.map((note)=> {
+               let display = `${moment(note.StartTime).format('ddd Do HH:mm')} - ${note.duration}min - ${note.note}`;
+               return <div>{display}</div>
+             })
+           )
+           :
+           (
+             <div>{moment(record.StartTime).format('ddd Do HH:mm')} - {record.totalDuration}min - {record.Notes}</div>
+             
+           )
+           }
+             </Space>
+             
+           
+          );
+
+      }}
     
   ]
 
