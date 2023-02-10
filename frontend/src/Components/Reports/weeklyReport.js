@@ -240,6 +240,11 @@ function WeeklyReport({actions, timecards, tasks}) {
                   let hrs = Math.floor(minutes / 60);
                   let min = minutes - (hrs * 60);
                   let display = `${hrs}hrs ${min}min`;
+
+                  let rem_minutes = 2400 - minutes;
+                  let rem_hrs = Math.floor(rem_minutes / 60);
+                  let rem_min = rem_minutes - (rem_hrs * 60);
+                  let rem_display = `${rem_hrs}hrs ${rem_min}min`;
                     return (
                         <>
                           <Table.Summary.Row>
@@ -249,7 +254,7 @@ function WeeklyReport({actions, timecards, tasks}) {
                             </Table.Summary.Cell>
                             <Table.Summary.Cell>Hours Left</Table.Summary.Cell>
                             <Table.Summary.Cell colSpan={2}>
-                              <Text type="danger">{display}</Text>
+                              <Text type="danger">{rem_display}</Text>
                             </Table.Summary.Cell>
                           </Table.Summary.Row>
                         </>
