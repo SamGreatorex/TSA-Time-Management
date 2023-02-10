@@ -16,6 +16,7 @@ function WeeklyReport({actions, timecards, tasks}) {
   const [weeksTimecard, setWeeksTimecard] = useState([]);
   const [groupByFunction, setGroupByFunction] = useState('TaskType');
   const [currentDateFilter, setCurrentDateFilter] = useState(moment().startOf('isoWeek')); 
+  const [summaryData, setSummaryData] = useState({Total: "", Remaining: ""});
 
   useEffect(() => {
     if(timecards.length === 0) {
@@ -49,9 +50,11 @@ function WeeklyReport({actions, timecards, tasks}) {
   const  resetData = async (date, groupType) => {
     let currentTimecard = timecards.find(x=>moment(x.StartDate).toString() === moment(date).toString());
     setWeeksTimecard(currentTimecard);
-   
-    let allTasks = currentTimecard?.Tasks || [];
 
+
+
+    let allTasks = currentTimecard?.Tasks || [];
+    console.log('All Tasks are:', allTasks);
 
     //Group by Task
     if(groupType === 'Task'){
@@ -83,7 +86,7 @@ function WeeklyReport({actions, timecards, tasks}) {
         let task = tasks.find(x=>x.TaskId === value.TaskId);
     
         if (!res[task.Type]) {
-          res[task.Type] = { TaskType: task.Type, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
+          res[task.Type] = { TaskId: task.TaskId, TaskType: task.Type, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
           result.push(res[task.Type])
         }
         res[task.Type].totalDuration += value.totalDuration;
@@ -94,20 +97,28 @@ function WeeklyReport({actions, timecards, tasks}) {
           res[task.Type].Notes.push(...value.Notes);
         }else
         {
-          res[task.Type].Notes.push({StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
+          res[task.Type].Notes.push({TaskId: task.TaskId, StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
         }
         return res;
       }, {});
       allTasks = result;
+      console.log('Set All tasks to', result);
     }
 
     
 
     //Set weekdates filter
     let weekDates = timecards.map(x=>x.StartDate);
+    let minutes = data.length > 0 ? data.map(x=>x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
+    let total = await convertMinToStringTime(minutes);
+    let remainingData = await convertMinToStringTime((40*5)-minutes);
+    let summaryData = {Total: total, Remaining: remainingData};
+    console.log('Summary Data', summaryData);
+
 
     //Set the UI
     setDataFilter([...weekDates]);
+    console.log('Set Data to', allTasks);
     setData(allTasks);
 
   }
@@ -224,16 +235,20 @@ function WeeklyReport({actions, timecards, tasks}) {
                   total: data ? data.length : 0,
                   pageSize: 15,
                   hideOnSinglePage: true,}}
-                summary={pageData => {
-                 let minutes = pageData.length > 0 ? pageData.map(x=>x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
-                 let hrs = Math.floor(minutes / 60);
-                 let min = minutes - (hrs * 60);
-                 let display = `${hrs}hrs ${min}min`;
+                  summary={pageData => {
+                  let minutes = pageData.length > 0 ? pageData.map(x=>x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
+                  let hrs = Math.floor(minutes / 60);
+                  let min = minutes - (hrs * 60);
+                  let display = `${hrs}hrs ${min}min`;
                     return (
                         <>
                           <Table.Summary.Row>
                             <Table.Summary.Cell>Total Duration</Table.Summary.Cell>
-                            <Table.Summary.Cell colSpan={4}>
+                            <Table.Summary.Cell colSpan={2}>
+                              <Text type="danger">{display}</Text>
+                            </Table.Summary.Cell>
+                            <Table.Summary.Cell>Hours Left</Table.Summary.Cell>
+                            <Table.Summary.Cell colSpan={2}>
                               <Text type="danger">{display}</Text>
                             </Table.Summary.Cell>
                           </Table.Summary.Row>
