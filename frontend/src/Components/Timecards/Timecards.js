@@ -299,7 +299,6 @@ function mapDispatchToProps(dispatch) {
     actions: {
       getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch),
       updateTimecard: bindActionCreators(tcActions.updateTimecard, dispatch),
-      updateTimecard: bindActionCreators(tcActions.updateTimecard, dispatch),
       getTasks: bindActionCreators(tcActions.getTasks, dispatch)
     }
   };

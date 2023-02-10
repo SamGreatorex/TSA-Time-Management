@@ -1,18 +1,26 @@
 import React, {useEffect, useState} from 'react';
-import {Select, Row, Col, Table, Typography, Space} from 'antd';
+import {Select, Row, Col, Table, Typography, Space, Button, Modal, Input} from 'antd';
 import * as tcActions from '../../redux/actions/timecards';
 import { connect} from 'react-redux';
 import {bindActionCreators } from 'redux';
 import moment from 'moment';
-import { convertMinToStringTime } from '../../utils/utils';
+
 
 const { Option } = Select;
 const { Text } = Typography;
+const { TextArea } = Input;
+
+
 function DailyReport({actions, timecards, tasks}) {
 
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([]);
   const [weeksTimecard, setWeeksTimecard] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+
+
+  const [editingTask, setEditingTask] = useState({});
 
   useEffect(() => {
     if(timecards.length === 0) {
@@ -25,6 +33,7 @@ function DailyReport({actions, timecards, tasks}) {
   }, []);
 
   useEffect(() => {
+    console.log('Timecard change')
     if(timecards.length > 0){
         resetData(moment());
     }
@@ -42,11 +51,8 @@ function DailyReport({actions, timecards, tasks}) {
     setWeeksTimecard(currentTimecard);
 
     let allTasks = currentTimecard?.Tasks || [];
-     console.log('Weeks Tasks', allTasks);
 
     let todaysTasks = allTasks.filter(x=>moment(x.StartTime).startOf('day').toString() === moment(date).startOf('day').toString());
-    console.log('todaysTasks', todaysTasks);
-        
     let weekDates = [];
     for (let i = 0; i < allTasks.length; i++) {
         let task = allTasks[i];
@@ -55,11 +61,90 @@ function DailyReport({actions, timecards, tasks}) {
             weekDates.push(task.StartTime);
         }
         }
-       console.log('WeekDates', [...weekDates])
         setDataFilter([...weekDates]);
         setData(todaysTasks);
 
   }
+
+  const UpdateRecord = (record) => {
+  let notes = [];
+  for (let i = 0; i < record.Notes.length; i++) {
+    let note = record.Notes[i];
+    notes.push({...note});
+  }
+  let task = {
+    "IsInProgress":record.IsInProgress,
+    "StartTime":record.StartTime,
+    "totalDuration":record.totalDuration,
+    "TaskId":record.TaskId,
+    "Notes": notes 
+  } 
+ setEditingTask(task);
+  setIsModalOpen(true);
+  }
+  const OnSaveRecord = async () => {
+    console.log('Saving Record');
+
+    let updatedTask = {...editingTask};
+    setEditingTask({});
+    await onUpdateTask(updatedTask);
+     setIsModalOpen(false);
+    // await onUpdateTask(record);
+
+
+  }
+
+  const onUpdateTask = async (task) => {
+      
+  let updatedTasks = task
+  ? [...weeksTimecard.Tasks.filter(x=> !(x.TaskId === task.TaskId))] 
+  : [...weeksTimecard.Tasks];
+  updatedTasks = [...updatedTasks, task];  
+
+   let updatedTimeCard = {...weeksTimecard, Tasks: updatedTasks};
+   setWeeksTimecard(updatedTimeCard);
+ await actions.updateTimecard(updatedTimeCard);
+
+  }
+
+
+  const onInputChange = (e, key, index) => {
+
+    let updatingTask = {...editingTask};
+    let taskNoteIndex = updatingTask.Notes.findIndex(x=>x.StartTime === index.StartTime && x.note === index.note);
+    updatingTask.Notes[taskNoteIndex][key] = key === "duration" ? parseInt(e.target.value) : e.target.value;
+    console.log('Updated Task', updatingTask);
+    setEditingTask(updatingTask);
+  };
+
+  const recordColumns = [
+    {
+        title: 'Start Time',
+        key: 'StartTime',
+        width: "300px",
+        render: (record, index) => (
+          <Input value={record.StartTime}  onChange={(e)=> onInputChange(e,"StartTime", index)}/>
+        )
+    },
+    {
+      title: 'Duration',
+      key: 'duration',
+      render: (record, index) => (
+        <Input value={record.duration} onChange={(e) => onInputChange(e,"duration", index)} />
+      )
+  },
+  {
+    title: 'Note',
+    key: 'note',
+    width: "500px",
+    render: (record, index) => (
+      <TextArea value={record.note}  onChange={(e) => onInputChange(e, "note", index)}/>
+    )
+  }
+    ]
+
+
+
 
   const dataColumns = [
     {
@@ -97,11 +182,9 @@ function DailyReport({actions, timecards, tasks}) {
         key: 'totalDuration',
         render:  (record) => {
            const minutes = record.totalDuration;
-           console.log('Converting', minutes );
            let hrs = Math.floor(minutes / 60);
            let min = minutes - (hrs * 60);
            const display =  `${hrs}hrs ${min}min`;
-           console.log('Display is', display );
           return (
             <Space direction="vertical">
               {display}
@@ -133,8 +216,17 @@ function DailyReport({actions, timecards, tasks}) {
           
          );
        }
+      },
+      {
+        key: 'actions',
+        render:  (record) => {
+         return (
+      <Button onClick={() => UpdateRecord(record)}> Update Note </Button>
+            
+          
+         );
+       }
       }
-    
   ];
 
   return (
@@ -162,14 +254,10 @@ function DailyReport({actions, timecards, tasks}) {
                   pageSize: 15,
                   hideOnSinglePage: true,}}
                 summary={pageData => {
-                console.log(pageData)
-
                  let minutes = pageData.length > 0 ? pageData.map(x=>x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
                  let hrs = Math.floor(minutes / 60);
                  let min = minutes - (hrs * 60);
                  let display = `${hrs}hrs ${min}min`;
-                
-                console.log(display)
                     return (
                         <>
                           <Table.Summary.Row>
@@ -184,7 +272,22 @@ function DailyReport({actions, timecards, tasks}) {
               /> 
 
       </Row>
-     
+      
+      <Modal title="Basic Modal" open={isModalOpen} footer={null} onCancel={()=> setIsModalOpen(false)} width="800px">
+              <>
+                <div>{JSON.stringify(editingTask)}</div>
+                <Table
+                  rowKey="id"
+                  columns={recordColumns}
+                  dataSource={editingTask.Notes}
+                  pagination={false}
+                />
+                <Row>
+                <Button onClick={() => OnSaveRecord()}>Save</Button>
+                </Row>
+                
+                </>
+      </Modal>
      </div>
   ) 
 }
@@ -200,10 +303,12 @@ function mapDispatchToProps(dispatch) {
   return {
     actions: {
       getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch),
-      getTasks: bindActionCreators(tcActions.getTasks, dispatch)
+      getTasks: bindActionCreators(tcActions.getTasks, dispatch),
+      updateTimecard: bindActionCreators(tcActions.updateTimecard, dispatch)
     }
   };
 }
+
 
 
 
