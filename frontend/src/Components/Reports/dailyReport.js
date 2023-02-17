@@ -42,10 +42,6 @@ function DailyReport({actions, timecards, tasks}) {
 
 
 
-  const OnWeekChanged = async (date) => {
-    resetData(date)
-  }
-
   const resetData = async (date) => {
     let currentTimecard = timecards.find(x=>moment(x.StartDate).toString() === moment().startOf('isoWeek').toString());
     setWeeksTimecard(currentTimecard);
@@ -82,13 +78,13 @@ function DailyReport({actions, timecards, tasks}) {
  setEditingTask(task);
   setIsModalOpen(true);
   }
+
   const OnSaveRecord = async () => {
     console.log('Saving Record', editingTask);
 
     let updatedTask = {...editingTask};
 
     //Update the value of totalDuration
-    let totalDuration =  updatedTask.Notes.map(x=>x.duration)?.reduce((sum, val) => sum + val);
     updatedTask.totalDuration = updatedTask.Notes.map(x=>x.duration)?.reduce((sum, val) => sum + val);
     setEditingTask({});
     await onUpdateTask(updatedTask);
@@ -108,6 +104,8 @@ function DailyReport({actions, timecards, tasks}) {
 
   }
 
+  
+
 
   const onInputChange = (e, key, index) => {
 
@@ -118,15 +116,36 @@ function DailyReport({actions, timecards, tasks}) {
     setEditingTask(updatingTask);
   };
 
-  const OnAddNewNote = (e, key, index) => {
+  const OnAddNewNote = (record) => {
+    console.log('Record Adding Note to', record)
+    let notes = [];
+    notes.push({StartTime: moment().toISOString(), Duration: 15, Note: ""});
+    for (let i = 0; i < record.Notes.length; i++) {
+      let note = record.Notes[i];
+      notes.push({...note});
+    }
+    let task = {
+      "IsInProgress":record.IsInProgress,
+      "StartTime":record.StartTime,
+      "totalDuration":record.totalDuration,
+      "TaskId":record.TaskId,
+      "Notes": notes 
+    } 
+   setEditingTask(task);
+    setIsModalOpen(true);
 
-    let updatingTask = {...editingTask};
-    let newNote = {StartTime: moment().toISOString(), Duration: 15, Note: ""}
-    updatingTask.Notes.push(newNote);
-    console.log('Updated Task', updatingTask);
-    setEditingTask(updatingTask);
+    // let updatingTask = {...editingTask};
+    // let newNote = {StartTime: moment().toISOString(), Duration: 15, Note: ""}
+    // updatingTask.Notes.push(newNote);
+    // console.log('Updated Task', updatingTask);
+    // setEditingTask(updatingTask);
+    // setIsModalOpen(true);
   };
   
+  // const onDeleteNote = (record) => {
+  //   console.log('Deleting note', record)
+  //   let task = {...updatingTask};
+  // };
 
   const recordColumns = [
     {
@@ -151,13 +170,18 @@ function DailyReport({actions, timecards, tasks}) {
     render: (record, index) => (
       <TextArea value={record.note}  onChange={(e) => onInputChange(e, "note", index)}/>
     )
-  },
-  {
-    key: 'actions',
-    render: (record) => (
-      <Button onClick={(record)=> OnAddNewNote(record)}>Add New</Button>
-    )
-  }
+
+   }
+  // {
+  //   key: 'actions',
+  //   render:  (note) => {
+  //    return (
+  //     <>
+  //      <Button onClick={() => onDeleteNote(note)}> Delete Task </Button>
+  //     </>
+  //    );
+  //  }
+  // }
     ]
 
 
@@ -238,9 +262,10 @@ function DailyReport({actions, timecards, tasks}) {
         key: 'actions',
         render:  (record) => {
          return (
-      <Button onClick={() => UpdateRecord(record)}> Update Task </Button>
-            
-          
+          <>
+           <Button onClick={() => UpdateRecord(record)}> Update Task </Button>
+          <Button onClick={()=> OnAddNewNote(record)}>Add New</Button>
+          </>
          );
        }
       }
@@ -293,7 +318,6 @@ function DailyReport({actions, timecards, tasks}) {
       <Modal title="Basic Modal" open={isModalOpen} footer={null} onCancel={()=> setIsModalOpen(false)} width="800px">
               <>
                 <div>{JSON.stringify(editingTask)}</div>
-                <Button onClick={(record)=> OnAddNewNote(record)}>Add New</Button>
                 <Table
                   rowKey="id"
                   columns={recordColumns}
