@@ -83,15 +83,16 @@ function DailyReport({actions, timecards, tasks}) {
   setIsModalOpen(true);
   }
   const OnSaveRecord = async () => {
-    console.log('Saving Record');
+    console.log('Saving Record', editingTask);
 
     let updatedTask = {...editingTask};
+
+    //Update the value of totalDuration
+    let totalDuration =  updatedTask.Notes.map(x=>x.duration)?.reduce((sum, val) => sum + val);
+    updatedTask.totalDuration = updatedTask.Notes.map(x=>x.duration)?.reduce((sum, val) => sum + val);
     setEditingTask({});
     await onUpdateTask(updatedTask);
      setIsModalOpen(false);
-    // await onUpdateTask(record);
-
-
   }
 
   const onUpdateTask = async (task) => {
@@ -117,6 +118,16 @@ function DailyReport({actions, timecards, tasks}) {
     setEditingTask(updatingTask);
   };
 
+  const OnAddNewNote = (e, key, index) => {
+
+    let updatingTask = {...editingTask};
+    let newNote = {StartTime: moment().toISOString(), Duration: 15, Note: ""}
+    updatingTask.Notes.push(newNote);
+    console.log('Updated Task', updatingTask);
+    setEditingTask(updatingTask);
+  };
+  
+
   const recordColumns = [
     {
         title: 'Start Time',
@@ -139,6 +150,12 @@ function DailyReport({actions, timecards, tasks}) {
     width: "500px",
     render: (record, index) => (
       <TextArea value={record.note}  onChange={(e) => onInputChange(e, "note", index)}/>
+    )
+  },
+  {
+    key: 'actions',
+    render: (record) => (
+      <Button onClick={(record)=> OnAddNewNote(record)}>Add New</Button>
     )
   }
     ]
@@ -221,7 +238,7 @@ function DailyReport({actions, timecards, tasks}) {
         key: 'actions',
         render:  (record) => {
          return (
-      <Button onClick={() => UpdateRecord(record)}> Update Note </Button>
+      <Button onClick={() => UpdateRecord(record)}> Update Task </Button>
             
           
          );
@@ -276,6 +293,7 @@ function DailyReport({actions, timecards, tasks}) {
       <Modal title="Basic Modal" open={isModalOpen} footer={null} onCancel={()=> setIsModalOpen(false)} width="800px">
               <>
                 <div>{JSON.stringify(editingTask)}</div>
+                <Button onClick={(record)=> OnAddNewNote(record)}>Add New</Button>
                 <Table
                   rowKey="id"
                   columns={recordColumns}
@@ -283,6 +301,7 @@ function DailyReport({actions, timecards, tasks}) {
                   pagination={false}
                 />
                 <Row>
+
                 <Button onClick={() => OnSaveRecord()}>Save</Button>
                 </Row>
                 
