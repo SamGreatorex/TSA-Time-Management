@@ -97,7 +97,7 @@ const { Option } = Select;
         IsInProgress : true,
         TaskStartTime: moment().toISOString()
     };
-    console.log('Starting new tasl', newTask);
+    console.log('Starting new task', newTask);
     onUpdateTask(newTask);
 
     //setUpdatingTask(true)
@@ -121,7 +121,7 @@ const { Option } = Select;
     console.log('Startdate ', startDate);
     console.log('endDate ', endDate);
 
-    notes.push({StartTime: task.TaskStartTime, duration: minutes, note: tcDescription});
+    notes.push({noteId: uuid(), StartTime: task.TaskStartTime, duration: minutes, note: tcDescription});
    
     if(task._totalDuration) minutes = minutes + task._totalDuration;
 

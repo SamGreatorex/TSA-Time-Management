@@ -4,6 +4,7 @@ import * as tcActions from '../../redux/actions/timecards';
 import { connect} from 'react-redux';
 import {bindActionCreators } from 'redux';
 import moment from 'moment';
+import { v4 as uuid } from 'uuid';
 
 
 const { Option } = Select;
@@ -66,7 +67,14 @@ function DailyReport({actions, timecards, tasks}) {
   let notes = [];
   for (let i = 0; i < record.Notes.length; i++) {
     let note = record.Notes[i];
-    notes.push({...note});
+    console.log('Adding Note: ', note, !note.noteId)
+    if(!note.noteId)
+    {
+      notes.push({...note, noteId: uuid()});
+    }else
+    {
+      notes.push({...note});
+    }
   }
   let task = {
     "IsInProgress":record.IsInProgress,
@@ -115,11 +123,10 @@ function DailyReport({actions, timecards, tasks}) {
     console.log('Updated Task', updatingTask);
     setEditingTask(updatingTask);
   };
-
   const OnAddNewNote = (record) => {
     console.log('Record Adding Note to', record)
     let notes = [];
-    notes.push({StartTime: moment().toISOString(), Duration: 15, Note: ""});
+    notes.push({noteId: uuid(), StartTime: moment().toISOString(), duration: 15, note: ""});
     for (let i = 0; i < record.Notes.length; i++) {
       let note = record.Notes[i];
       notes.push({...note});
