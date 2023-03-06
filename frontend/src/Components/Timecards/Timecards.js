@@ -224,7 +224,7 @@ const { Option } = Select;
            <Table
                 style={{ marginTop: '4px', width: '100%' }}
                 size='small'
-                dataSource={!currentTimecard.AvailableTasks ? [] : currentTimecard.AvailableTasks}
+                dataSource={!currentTimecard.AvailableTasks ? [] : currentTimecard.AvailableTasks.sort((a, b) => a.Type.toLowerCase() > b.Type.toLowerCase() ? 1 : -1)}
                 rowKey={(record) => record.TaskId}
                 columns={timeCardsTasks}
                 pagination={{  
@@ -240,7 +240,7 @@ const { Option } = Select;
       <Form name="createTask" labelCol={{ span: 8, }} wrapperCol={{ span: 16, }} form={form} onFinish={onCreateTask}>
       <Form.Item label="Task Type" name="type" rules={[{required: true, message: 'Please select a type!'}]}>
       <Select style={{ width: '300px' }}>
-          {tasks?.map((tc) => (
+          {tasks?.sort((a, b) => a.Type.toLowerCase() > b.Type.toLowerCase() ? 1 : -1).map((tc) => (
             <Option key={tc.TaskId}>{tc.Type} - {tc.Name}</Option>
           ))}
         </Select>

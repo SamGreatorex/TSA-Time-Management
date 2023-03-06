@@ -12,7 +12,7 @@ function Tasks({actions, tasks}) {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [form] = Form.useForm();
 
-  const initialTask = {TaskId: uuid(), Default: false, Type: "", Name: "" }
+  const initialTask = {TaskId: uuid(), Default: false, Type: "", Name: "", IsVisible: true }
   useEffect(() => {
     console.log('Tasks are', tasks);
       if(tasks.length === 0) actions.getTasks();
@@ -85,7 +85,7 @@ function Tasks({actions, tasks}) {
         <Table
                 style={{ marginTop: '4px', width: '100%' }}
                 size='small'
-                dataSource={!tasks ? [] : tasks}
+                dataSource={!tasks ? [] : tasks.filter(x=>x.IsVisible).sort((a, b) => a.Type.toLowerCase() > b.Type.toLowerCase() ? 1 : -1)}
                 rowKey={(record) => record.TaskId}
                 columns={taskColumns}
                 pagination={{  
@@ -101,6 +101,7 @@ function Tasks({actions, tasks}) {
 
      <Form name="createTask" labelCol={{ span: 8, }} wrapperCol={{ span: 16, }} form={form} onFinish={(onCreateTask)}>
      <Form.Item hidden='true' name='TaskId'/>
+     <Form.Item hidden='true' name='IsVisible'/>
      <Form.Item label="Task Name" name="Name" rules={[{required: true, message: 'Please input a name'}]}>
       <Input/>
      </Form.Item>

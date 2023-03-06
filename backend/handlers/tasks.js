@@ -49,8 +49,16 @@ module.exports.deleteTask = async (event, context, callback) => {
   
  //Create item
     const pathParameters = event.pathParameters;
-     let response = await dynamo.dynamoDeleteItem(taskTable, 'TaskId', pathParameters.TaskId);
-     console.log('Dynamo deleted response.', response);
+    
+    const UpdateExpression = "set IsVisible = :x"
+    const ExpressionAttributeValues =  {
+      ":x": false,
+  }
+  
+
+     let response = await dynamo.dynamoUpdateItem(taskTable, 'TaskId', pathParameters.TaskId, UpdateExpression,ExpressionAttributeValues);
+
+     console.log('Dynamo updated response.', response);
         return responseLib.success(response.body);
       } catch (error) {
         console.log('Error', error);
@@ -71,9 +79,10 @@ module.exports.listTasks = async (event) => {
       '#TaskId': 'TaskId',
       '#Name': 'Name',
       '#Type': 'Type',
+      '#IsVisible': 'IsVisible',
       '#Default': 'Default'
     };
-    const ProjectionExpression = '#TaskId, #Name, #Type, #Default'
+    const ProjectionExpression = '#TaskId, #Name, #Type, #IsVisible, #Default'
   
      var requests = await dynamo.dynamoScan(taskTable, null, ExpressionAttributeNames, null, ProjectionExpression)
      console.log('Request response', requests);

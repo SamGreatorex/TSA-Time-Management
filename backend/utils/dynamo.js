@@ -52,6 +52,31 @@ module.exports.dynamoDeleteItem = async (tableName, itemIdName, itemIdValue)  =>
   }
 }
 
+module.exports.dynamoUpdateItem = async (tableName, itemIdName, itemIdValue, UpdateExpression, ExpressionAttributeValues)  => {
+
+
+  console.log(`Updating ${itemIdName}: ${itemIdValue} from table: ${tableName}`);
+
+try
+{
+  let params = {
+      TableName: tableName,
+      Key: {
+        [itemIdName]: itemIdValue,
+      },
+      UpdateExpression,
+      ExpressionAttributeValues
+    };
+    await dynamoDb.update(params).promise();
+     console.log(`Updated ${itemIdName}:${itemIdValue} from table ${tableName}`);
+  return responseLib.success(`Updated Item ${itemIdValue} from table ${tableName}`);
+}catch(error)
+{
+  console.log('Update item failed: ', error);
+  return responseLib.failure({ message: error.message });
+}
+}
+
 module.exports.dynamoScan = async (tableName, FilterExpression, ExpressionAttributeNames, ExpressionAttributeValues, ProjectionExpression)  => {
 
 // console.log(`Deleting ${itemIdName}: ${itemIdValue} from table: ${tableName}`);
