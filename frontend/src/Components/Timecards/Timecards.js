@@ -54,7 +54,7 @@ const { Option } = Select;
         key: 'actions',
         align: 'center',
         render:  (record) => {
-           let tc =  currentTimecard.Tasks?.find(x=>x.TaskId === record.TaskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString())) || null;
+           let tc =  currentTimecard.Tasks?.find(x=>x.TaskTypeId === record.TaskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString())) || null;
            const RecordUpdating = currentTimecard.Tasks?.find(x=>x.IsInProgress && x.IsInProgress === true);
             return (
               <div>
@@ -87,54 +87,50 @@ const { Option } = Select;
   const OnStartTask = async (record) => {
 
     let existingTask = await getExistingTask(record.TaskId);
-    console.log('Starting Task', record, existingTask);
+
     //check if task already exists
     let newTask = {
         StartTime: existingTask?.StartTime ? existingTask.StartTime : moment().toISOString(),
         totalDuration: existingTask?.totalDuration ? existingTask.totalDuration : 0,
-        TaskId: record.TaskId,
+        TaskId: existingTask?.TaskId ? existingTask.TaskId :  uuid(),
+        TaskTypeId: record.TaskId,
         Notes:  existingTask?.Notes ? existingTask.Notes : [],
         IsInProgress : true,
         TaskStartTime: moment().toISOString()
     };
-    console.log('Starting new task', newTask);
-    onUpdateTask(newTask);
 
-    //setUpdatingTask(true)
+    onUpdateTask(newTask);
+    setUpdatingTask(true)
   }
 
   const getExistingTask = async (taskId) => {
-    let existingTask = {...currentTimecard.Tasks?.find(x=>x.TaskId === taskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString()))};
+    let existingTask = {...currentTimecard.Tasks?.find(x=>x.TaskTypeId === taskId && (moment(x.StartTime).startOf('day').toString() === moment().startOf('day').toString()))};
     return existingTask;
   }
 
   const OnEndTask = async (record) => {
-    console.log('Ending Task', record);
 
-    let task = await getExistingTask(record.TaskId);
-    let notes = [...task.Notes];
+    let task = {...currentTimecard.Tasks.find(x=>x.IsInProgress)};
+     let notes = [...task.Notes];
 
-    let startDate = await formatDate(moment(task.TaskStartTime));
-    let endDate = await formatDate(moment());
-    var duration = moment.duration(moment(endDate).diff(startDate));
-    var minutes = duration.asMinutes() === 0 ? 15 : duration.asMinutes();
-    console.log('Startdate ', startDate);
-    console.log('endDate ', endDate);
 
-    notes.push({noteId: uuid(), StartTime: task.TaskStartTime, duration: minutes, note: tcDescription});
-   
-    if(task._totalDuration) minutes = minutes + task._totalDuration;
+     let startDate = await formatDate(moment(task.TaskStartTime));
+     let endDate = await formatDate(moment());
+      var duration = moment.duration(moment(endDate).diff(startDate));
+     var minutes = duration.asMinutes() === 0 ? 15 : duration.asMinutes();
 
+
+     notes.push({noteId: uuid(), StartTime: task.TaskStartTime, duration: minutes, note: tcDescription});
+
+
+    console.log('!!!', task, notes);
     delete task.TaskStartTime;
-    console.log('Duration saving as ', duration);
-    task.totalDuration = task.totalDuration + minutes;
+    task.totalDuration = parseInt(minutes) + parseInt(task.totalDuration);
     task.Notes =  notes;
     task.IsInProgress = false;
-    console.log('Updated Task', task)
     await onUpdateTask(task)
-
     setUpdatingTask(false);
-  }
+   }
 
   const OnTimeCardChanged = async (record) => {
     console.log('Timecard changed', record);
@@ -157,16 +153,21 @@ const { Option } = Select;
   }
 
   const onUpdateTask = async (task) => {
-    
-    let existingTask = await getExistingTask(task.TaskId);
-    console.log('Existing Task Found', existingTask)
-    let updatedTasks = existingTask
-    ? [...currentTimecard.Tasks.filter(x=> !(x.TaskId === existingTask.TaskId && x.StartTime === existingTask.StartTime))] 
-    : [...currentTimecard.Tasks];
-    updatedTasks = [...updatedTasks, task];  
 
+     let allTasks = [...currentTimecard.Tasks.filter(x=> x.TaskId !== task.TaskId)] 
+     allTasks.push(task);
      let updatedTimeCard = {...currentTimecard};
-     updatedTimeCard.Tasks = updatedTasks;
+     updatedTimeCard.Tasks = allTasks;
+     console.log('!!!', updatedTimeCard);
+    // let existingTask = await getExistingTask(task.TaskId);
+    // console.log('Existing Task Found', existingTask)
+    // let updatedTasks = existingTask
+    // ? [...currentTimecard.Tasks.filter(x=> !(x.TaskId === existingTask.TaskId && x.StartTime === existingTask.StartTime))] 
+    // : [...currentTimecard.Tasks];
+   // updatedTasks = [...updatedTasks, task];  
+
+   //  let updatedTimeCard = {...currentTimecard};
+   //  updatedTimeCard.Tasks = updatedTasks;
    
     actions.updateTimecard(updatedTimeCard);
   }
