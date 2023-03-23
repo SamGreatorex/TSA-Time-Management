@@ -14,7 +14,7 @@ const { TextArea } = Input;
 
 function DailyReport({actions, timecards, tasks}) {
 
-  const [currentDate, setCurrentDate] = useState(moment().format('Do MMM YY').toString())
+  const [currentDate, setCurrentDate] = useState(moment())
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([]);
   const [weeksTimecard, setWeeksTimecard] = useState([]);
@@ -30,13 +30,13 @@ function DailyReport({actions, timecards, tasks}) {
         actions.getTasks();
     }else
     {
-        resetData(moment());
+        resetData(currentDate);
     }
   }, []);
 
   useEffect(() => {
     if(timecards.length > 0){
-        resetData(moment());
+        resetData(currentDate);
     }
 
   }, [timecards]);
@@ -44,6 +44,7 @@ function DailyReport({actions, timecards, tasks}) {
 
 
   const resetData = async (date) => {
+    setData([]);
     setCurrentDate(date);
     let currentTimecard = timecards.find(x=>moment(x.StartDate).toString() === moment().startOf('isoWeek').toString());
     setWeeksTimecard(currentTimecard);
@@ -61,7 +62,6 @@ function DailyReport({actions, timecards, tasks}) {
         }
         setDataFilter([...weekDates]);
         setData(todaysTasks);
-
   }
 
   const UpdateRecord = (record) => {
@@ -306,7 +306,7 @@ function DailyReport({actions, timecards, tasks}) {
       <Row>
       <Col> 
       {/* <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={resetData} defaultValue={()=>  moment().format('Do MMM YY').toString()}> */}
-      <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={resetData} defaultValue={currentDate}>
+      <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={(date) => resetData(moment(date))} defaultValue={currentDate.format('Do MMM YY').toString()}>
         {dataFilter.map((data) => (
         <Option key={data}>{moment(data).format('Do MMM YY')}</Option>
         ))}
