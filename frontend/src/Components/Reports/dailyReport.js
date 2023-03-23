@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Select, Row, Col, Table, Typography, Space, Button, Modal, Input} from 'antd';
+import {Select, Row, Col, Table, Typography, Space, Button, Modal, Input, Tooltip, Form} from 'antd';
 import * as tcActions from '../../redux/actions/timecards';
 import { connect} from 'react-redux';
 import {bindActionCreators } from 'redux';
@@ -14,14 +14,15 @@ const { TextArea } = Input;
 
 function DailyReport({actions, timecards, tasks}) {
 
+  const [currentDate, setCurrentDate] = useState(moment().format('Do MMM YY').toString())
   const [data, setData] = useState([])
   const [dataFilter, setDataFilter] = useState([]);
   const [weeksTimecard, setWeeksTimecard] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
-
-
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState({});
+  const [form] = Form.useForm();
 
   useEffect(() => {
     if(timecards.length === 0) {
@@ -34,7 +35,6 @@ function DailyReport({actions, timecards, tasks}) {
   }, []);
 
   useEffect(() => {
-    console.log('Timecard change')
     if(timecards.length > 0){
         resetData(moment());
     }
@@ -44,6 +44,7 @@ function DailyReport({actions, timecards, tasks}) {
 
 
   const resetData = async (date) => {
+    setCurrentDate(date);
     let currentTimecard = timecards.find(x=>moment(x.StartDate).toString() === moment().startOf('isoWeek').toString());
     setWeeksTimecard(currentTimecard);
 
@@ -67,7 +68,6 @@ function DailyReport({actions, timecards, tasks}) {
   let notes = [];
   for (let i = 0; i < record.Notes.length; i++) {
     let note = record.Notes[i];
-    console.log('Adding Note: ', note, !note.noteId)
     if(!note.noteId)
     {
       notes.push({...note, noteId: uuid()});
@@ -84,7 +84,7 @@ function DailyReport({actions, timecards, tasks}) {
     "TaskTypeId": record.TaskTypeId,
     "Notes": notes 
   } 
-  console.log('Editing task:', task)
+
    setEditingTask(task);
    setIsModalOpen(true);
   }
@@ -102,34 +102,56 @@ function DailyReport({actions, timecards, tasks}) {
 
   }
 
+  const onCreateTask = async (task) => {
+    console.log('Adding task', task);
+    
+   // let existingTasks = currentTimecard.AvailableTasks;
+   // existingTasks.push(tasks.find(x=> x.TaskId === task.type));
+    let availableTasks = [...weeksTimecard.AvailableTasks];
+    availableTasks.push(tasks.find(x=> x.TaskId === task.type));
+
+    let _tasks = [...weeksTimecard.Tasks];
+    //check if task already exists
+    let newTask = {
+      StartTime: moment(currentDate).toISOString(),
+      totalDuration: 0,
+      TaskId: uuid(),
+      TaskTypeId: task.type,
+      Notes: [{noteId: uuid(), StartTime: moment().toISOString(), duration: 0, note: ""}],
+      IsInProgress : false
+  };
+  _tasks.push(newTask);
+
+    let timecard = {...weeksTimecard}
+    timecard.AvailableTasks = availableTasks;
+  timecard.Tasks = _tasks;
+
+    actions.updateTimecard(timecard);
+     setIsTaskModalOpen(false);
+  }
+
   const onUpdateTask = async (task) => {
-  
-    console.log('Weeks Tasks', weeksTimecard, task);
+
     let updatedTasks = [...weeksTimecard.Tasks.filter(x=>x.TaskId !== task.TaskId)]
     updatedTasks = [...updatedTasks];  
     updatedTasks.push(task);
     let updatedTimeCard = {...weeksTimecard};
     updatedTimeCard.Tasks = updatedTasks;
-    console.log('Updated timecard', updatedTimeCard);
+
      setWeeksTimecard(updatedTimeCard);
      await actions.updateTimecard(updatedTimeCard);
-    setIsModalOpen(false);
-
+     setIsModalOpen(false);
   }
-
-  
-
 
   const onInputChange = (e, key, index) => {
 
     let updatingTask = {...editingTask};
     let taskNoteIndex = updatingTask.Notes.findIndex(x=>x.StartTime === index.StartTime && x.note === index.note);
     updatingTask.Notes[taskNoteIndex][key] = key === "duration" ? parseInt(e.target.value) : e.target.value;
-    console.log('Updated Task', updatingTask);
     setEditingTask(updatingTask);
   };
+
   const OnAddNewNote = (record) => {
-    console.log('Record Adding Note to', record)
     let notes = [];
     notes.push({noteId: uuid(), StartTime: moment().toISOString(), duration: 15, note: ""});
     for (let i = 0; i < record.Notes.length; i++) {
@@ -141,17 +163,12 @@ function DailyReport({actions, timecards, tasks}) {
       "StartTime":record.StartTime,
       "totalDuration":record.totalDuration,
       "TaskId":record.TaskId,
+      "TaskTypeId":record.TaskTypeId,
       "Notes": notes 
     } 
    setEditingTask(task);
     setIsModalOpen(true);
 
-    // let updatingTask = {...editingTask};
-    // let newNote = {StartTime: moment().toISOString(), Duration: 15, Note: ""}
-    // updatingTask.Notes.push(newNote);
-    // console.log('Updated Task', updatingTask);
-    // setEditingTask(updatingTask);
-    // setIsModalOpen(true);
   };
   
   // const onDeleteNote = (record) => {
@@ -213,7 +230,7 @@ function DailyReport({actions, timecards, tasks}) {
         render:  (record) => {
             return (
               <Space direction="vrtical">
-                {tasks?.find(x=>x.TaskId === record.TaskId)?.Name ?? ""}
+                {tasks?.find(x=>x.TaskId === record.TaskTypeId)?.Name ?? ""}
                 </Space>
             );
           },
@@ -225,7 +242,7 @@ function DailyReport({actions, timecards, tasks}) {
         render:  (record) => {
             return (
               <Space direction="vrtical">
-                {tasks?.find(x=>x.TaskId === record.TaskId)?.Type ?? ""}
+                {tasks?.find(x=>x.TaskId === record.TaskTypeId)?.Type ?? ""}
                 </Space>
             );
           },
@@ -288,11 +305,16 @@ function DailyReport({actions, timecards, tasks}) {
 
       <Row>
       <Col> 
-      <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={resetData} defaultValue={()=>  moment().format('Do MMM YY').toString()}>
+      {/* <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={resetData} defaultValue={()=>  moment().format('Do MMM YY').toString()}> */}
+      <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={resetData} defaultValue={currentDate}>
         {dataFilter.map((data) => (
         <Option key={data}>{moment(data).format('Do MMM YY')}</Option>
         ))}
       </Select>
+
+      <Tooltip title="create-task">
+                    <Button type="primary" onClick={() => setIsTaskModalOpen(true)}> Add New Task </Button>
+            </Tooltip>
       </Col>
       </Row>
       <Row>
@@ -343,6 +365,30 @@ function DailyReport({actions, timecards, tasks}) {
                 
                 </>
       </Modal>
+
+      <Modal title="Add Task" open={isTaskModalOpen}  footer={null} onCancel={()=> setIsTaskModalOpen(false)}>
+     
+     <Form name="createTask" labelCol={{ span: 8, }} wrapperCol={{ span: 16, }} form={form} onFinish={onCreateTask}>
+     <Form.Item label="Task Type" name="type" rules={[{required: true, message: 'Please select a type!'}]}>
+     <Select style={{ width: '300px' }}>
+         {tasks?.filter(x=>x.IsVisible).sort((a, b) => a.Type.toLowerCase() > b.Type.toLowerCase() ? 1 : -1).map((tc) => (
+           <Option key={tc.TaskId}>{tc.Type} - {tc.Name}</Option>
+         ))}
+       </Select>
+     </Form.Item>
+     <Form.Item
+       wrapperCol={{
+         offset: 8,
+         span: 16,
+       }}
+     >
+       <Button type="primary" htmlType="submit">
+         Select
+       </Button>
+     </Form.Item>
+   </Form>
+     </Modal>
+
      </div>
   ) 
 }
