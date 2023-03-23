@@ -115,19 +115,6 @@ function DailyReport({actions, timecards, tasks}) {
      await actions.updateTimecard(updatedTimeCard);
     setIsModalOpen(false);
 
-
-  // let updatedTasks = task
-  // ? [...weeksTimecard.Tasks.filter(x=> x.TaskId !== task.TaskId && x.StartTime !== task.StartTime)] 
-  // : [...weeksTimecard.Tasks];
-  // console.log('Updated Tasks Tasks', updatedTasks);
-  // updatedTasks = [...updatedTasks, task];  
-  // console.log('Updated Tasks Tasks2', updatedTasks);
-  //  let updatedTimeCard = {...weeksTimecard, Tasks: updatedTasks};
-  //  console.log('Updated timecard', updatedTimeCard);
-  //  setWeeksTimecard(updatedTimeCard);
-
-    // await actions.updateTimecard(updatedTimeCard);
-
   }
 
   
