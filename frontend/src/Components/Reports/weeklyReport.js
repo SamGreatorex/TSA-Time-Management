@@ -61,17 +61,17 @@ function WeeklyReport({actions, timecards, tasks}) {
       var result = [];
       allTasks.reduce(function(res, value) {
         console.log('Looping Reducer', value, res);
-        if (!res[value.TaskId]) {
-          res[value.TaskId] = { TaskId: value.TaskId, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
-          result.push(res[value.TaskId])
+        if (!res[value.TaskTypeId]) {
+          res[value.TaskTypeId] = { TaskId: value.TaskId, TaskTypeId: value.TaskTypeId, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
+          result.push(res[value.TaskTypeId])
         }
-        res[value.TaskId].totalDuration += value.totalDuration;
+        res[value.TaskTypeId].totalDuration += value.totalDuration;
         if(Array.isArray(value.Notes)){
      
-          res[value.TaskId].Notes.push(...value.Notes);
+          res[value.TaskTypeId].Notes.push(...value.Notes);
         }else
         {
-          res[value.TaskId].Notes.push({StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
+          res[value.TaskTypeId].Notes.push({StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
         }
   
         console.log('Returning Notes', res, value);
@@ -81,12 +81,14 @@ function WeeklyReport({actions, timecards, tasks}) {
     }
 
     if(groupType === 'TaskType'){
+
       var result = [];
       allTasks.reduce(function(res, value) {
-        let task = tasks.find(x=>x.TaskId === value.TaskId);
-    
+
+        let task = tasks.find(x=>x.TaskId === value.TaskTypeId);
+
         if (!res[task.Type]) {
-          res[task.Type] = { TaskId: task.TaskId, TaskType: task.Type, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
+          res[task.Type] = { TaskId: task.TaskId, TaskTypeId: task.TaskTypeId, TaskType: task.Type, totalDuration: 0, Notes: [], StartTime: currentTimecard.StartDate};
           result.push(res[task.Type])
         }
         res[task.Type].totalDuration += value.totalDuration;
@@ -97,7 +99,7 @@ function WeeklyReport({actions, timecards, tasks}) {
           res[task.Type].Notes.push(...value.Notes);
         }else
         {
-          res[task.Type].Notes.push({TaskId: task.TaskId, StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
+          res[task.Type].Notes.push({TaskId: task.TaskId, TaskTypeId: task.TaskTypeId,StartTime: value.StartTime, duration: value.totalDuration, note: value.Notes})
         }
         return res;
       }, {});
@@ -142,7 +144,7 @@ function WeeklyReport({actions, timecards, tasks}) {
         render:  (record) => {
             return (
               <Space direction="vertical">
-                {tasks?.find(x=>x.TaskId === record.TaskId)?.Name ?? ""}
+                {tasks?.find(x=>x.TaskId === record.TaskTypeId)?.Name ?? ""}
                 </Space>
             );
           },
@@ -154,7 +156,7 @@ function WeeklyReport({actions, timecards, tasks}) {
         render:  (record) => {
             return (
               <Space direction="vertical">
-                {record.TaskType ? record.TaskType : tasks?.find(x=>x.TaskId === record.TaskId)?.Type ?? ""}
+                {record.TaskType ? record.TaskType : tasks?.find(x=>x.TaskId === record.TaskTypeId)?.Type ?? ""}
                 </Space>
             );
           },
