@@ -58,7 +58,6 @@ export const DELETE_TASK = 'DELETE_TASK';
   const updateTimecard = (timecard) => {
     return async (dispatch) => {
       try {
-      
         const response = await timecardsApi.postTimecard(timecard);
         console.log('API Post timecard response:', response)
         dispatch(postTimecardSuccess(timecard));

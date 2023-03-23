@@ -81,10 +81,12 @@ function DailyReport({actions, timecards, tasks}) {
     "StartTime":record.StartTime,
     "totalDuration":record.totalDuration,
     "TaskId":record.TaskId,
+    "TaskTypeId": record.TaskTypeId,
     "Notes": notes 
   } 
-  setEditingTask(task);
-  setIsModalOpen(true);
+  console.log('Editing task:', task)
+   setEditingTask(task);
+   setIsModalOpen(true);
   }
 
   const OnSaveRecord = async () => {
@@ -94,24 +96,37 @@ function DailyReport({actions, timecards, tasks}) {
 
     //Update the value of totalDuration
     updatedTask.totalDuration = updatedTask.Notes.map(x=>x.duration)?.reduce((sum, val) => sum + val);
+
     setEditingTask({});
-    await onUpdateTask(updatedTask);
-     setIsModalOpen(false);
+     await onUpdateTask(updatedTask);
+
   }
 
   const onUpdateTask = async (task) => {
   
-    console.log('Weeks Tasks', weeksTimecard);
-  let updatedTasks = task
-  ? [...weeksTimecard.Tasks.filter(x=> x.TaskId !== task.TaskId && x.StartTime !== task.StartTime)] 
-  : [...weeksTimecard.Tasks];
-  console.log('Updated Tasks Tasks', updatedTasks);
-  updatedTasks = [...updatedTasks, task];  
-  console.log('Updated Tasks Tasks2', updatedTasks);
-   let updatedTimeCard = {...weeksTimecard, Tasks: updatedTasks};
-   console.log('Updated timecard', updatedTimeCard);
-   setWeeksTimecard(updatedTimeCard);
- await actions.updateTimecard(updatedTimeCard);
+    console.log('Weeks Tasks', weeksTimecard, task);
+    let updatedTasks = [...weeksTimecard.Tasks.filter(x=>x.TaskId !== task.TaskId)]
+    updatedTasks = [...updatedTasks];  
+    updatedTasks.push(task);
+    let updatedTimeCard = {...weeksTimecard};
+    updatedTimeCard.Tasks = updatedTasks;
+    console.log('Updated timecard', updatedTimeCard);
+     setWeeksTimecard(updatedTimeCard);
+     await actions.updateTimecard(updatedTimeCard);
+    setIsModalOpen(false);
+
+
+  // let updatedTasks = task
+  // ? [...weeksTimecard.Tasks.filter(x=> x.TaskId !== task.TaskId && x.StartTime !== task.StartTime)] 
+  // : [...weeksTimecard.Tasks];
+  // console.log('Updated Tasks Tasks', updatedTasks);
+  // updatedTasks = [...updatedTasks, task];  
+  // console.log('Updated Tasks Tasks2', updatedTasks);
+  //  let updatedTimeCard = {...weeksTimecard, Tasks: updatedTasks};
+  //  console.log('Updated timecard', updatedTimeCard);
+  //  setWeeksTimecard(updatedTimeCard);
+
+    // await actions.updateTimecard(updatedTimeCard);
 
   }
 
