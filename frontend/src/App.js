@@ -11,7 +11,7 @@ import store from "./redux/store";
 import DailyReport from './Components/Reports/dailyReport';
 import WeeklyReport from './Components/Reports/weeklyReport';
 import MonthlyReport from './Components/Reports/monthlyReport';
-
+import TmrData from './Components/Reports/TmrData';
 function App() {
   return (
     <Provider store={store}>
@@ -25,6 +25,7 @@ function App() {
               <Route path='/reports-daily' element={<DailyReport/>} />
               <Route path='/reports-weekly' element={<WeeklyReport/>} />
               <Route path='/reports-monthly' element={<MonthlyReport/>} />
+              <Route path='/tmr-data' element={<TmrData/>} />
           </Routes>
         </div>
       </Router>
