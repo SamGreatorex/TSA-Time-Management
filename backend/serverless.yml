@@ -116,6 +116,14 @@ functions:
           path: /{UserId}/timecard
           method: get
           cors: ${self:custom.cors-config}
+# Testing
+  testLambda:
+    handler: handlers/testing.testLambda
+    events:
+      - http:
+          path: testing
+          method: post
+          cors: ${self:custom.cors-config}
 resources:
   Resources:
     # Time Tasks
