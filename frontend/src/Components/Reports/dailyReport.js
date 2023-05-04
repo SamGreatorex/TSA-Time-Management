@@ -110,15 +110,6 @@ function DailyReport({ actions, timecards, tasks }) {
     setIsModalOpen(true);
   };
 
-  const onVivunCheckboxChanged = (e, record) => {
-    console.log(`target = ${JSON.stringify(record.TaskId)}`);
-    console.log(`checked = ${e.target.checked}`);
-    let amendedTask = { ...record };
-    amendedTask.addedVivun = e.target.checked;
-    console.log("UpdatedTask", amendedTask);
-    onUpdateTask({ ...amendedTask });
-  };
-
   const OnSaveRecord = async () => {
     console.log("Saving Record", editingTask);
 
@@ -317,25 +308,6 @@ function DailyReport({ actions, timecards, tasks }) {
               </div>
             )}
           </Space>
-        );
-      },
-    },
-    {
-      title: "Added To Vivun",
-      key: "addedVivun",
-      render: (record) => {
-        //Type console.log('')
-        const taskType =
-          tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Type ?? "";
-        const isVivun =
-          taskTypes.find((x) => x.value === taskType).vivunItem || false;
-        return (
-          isVivun && (
-            <Checkbox
-              onChange={(cb) => onVivunCheckboxChanged(cb, record)}
-              checked={record.addedVivun}
-            />
-          )
         );
       },
     },
