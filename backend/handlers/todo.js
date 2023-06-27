@@ -108,9 +108,10 @@ module.exports.get = async (event, context, callback) => {
       "#IsVisible": "IsVisible",
       "#Progress": "Progress",
       "#ReviewDate": "ReviewDate",
+      "#TaskId": "TaskId",
     };
     const ProjectionExpression =
-      "#Id, #Task, #Status, #IsVisible, #Progress, #ReviewDate";
+      "#Id, #Task, #Status, #IsVisible, #Progress, #ReviewDate, #TaskId";
 
     var requests = await dynamo.dynamoScan(
       dynamoTable,

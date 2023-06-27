@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import * as todoApi from "../../apis/todo";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import * as tcActions from "../../redux/actions/timecards";
 import {
   Form,
   Popconfirm,
@@ -10,30 +13,53 @@ import {
   Select,
   Tag,
   Button,
+  Cascader,
 } from "antd";
 import { v4 as uuid } from "uuid";
 import moment from "moment";
+import { getTaskSelectOptions } from "../../utils/helpers";
+
 const { TextArea } = Input;
 
-function Todo() {
-  const statusOptions = [
-    {
-      value: "New",
-      label: "New",
-    },
-    {
-      value: "In Progress",
-      label: "In Progress",
-    },
-    {
-      value: "Completed",
-      label: "Completed",
-    },
-    {
-      value: "Waiting",
-      label: "Waiting",
-    },
-  ];
+const statusOptions = [
+  {
+    value: "New",
+    label: "New",
+  },
+  {
+    value: "In Progress",
+    label: "In Progress",
+  },
+  {
+    value: "Completed",
+    label: "Completed",
+  },
+  {
+    value: "Waiting",
+    label: "Waiting",
+  },
+];
+
+function Todo({ actions, timecards, tasks }) {
+  const [form] = Form.useForm();
+  const [data, setData] = useState([]);
+  const [editingKey, setEditingKey] = useState("");
+  const [taskSelectOptions, setTaskSelectOptions] = useState("");
+  const isEditing = (record) => record.Id === editingKey;
+
+  useEffect(() => {
+    if (!timecards || timecards.length === 0) actions.getUserTimecards("samg");
+    if (!tasks || tasks.length === 0) actions.getTasks();
+    if (data.length === 0) LoadData();
+  }, []);
+
+  useEffect(() => {
+    if (data[0]?.hasOwnProperty("isNew")) edit(data[0]);
+  }, [data]);
+
+  useEffect(() => {
+    if (tasks.length > 0) getSelectOptions();
+  }, [tasks]);
 
   const EditableCell = ({
     editing,
@@ -57,6 +83,15 @@ function Todo() {
           }}
         />
       );
+    if (dataIndex === "TaskId") {
+      inputNode = (
+        <Cascader
+          style={{ paddingLeft: "10px" }}
+          options={taskSelectOptions}
+          placeholder="Select Task"
+        />
+      );
+    }
 
     return (
       <td {...restProps}>
@@ -75,16 +110,11 @@ function Todo() {
       </td>
     );
   };
-  const [form] = Form.useForm();
-  const [data, setData] = useState([]);
-  const [editingKey, setEditingKey] = useState("");
-  const isEditing = (record) => record.Id === editingKey;
 
-  useEffect(() => {
-    if (data.length === 0) LoadData();
-
-    if (data[0]?.hasOwnProperty("isNew")) edit(data[0]);
-  }, [data]);
+  const getSelectOptions = async () => {
+    const selectOptions = await getTaskSelectOptions(tasks);
+    setTaskSelectOptions(selectOptions);
+  };
 
   const LoadData = async () => {
     const data = await todoApi.listTodo();
@@ -102,6 +132,7 @@ function Todo() {
       Status: "",
       Progress: "",
       ReviewDate: "",
+      TaskId: "",
       ...record,
     });
     setEditingKey(record.Id);
@@ -127,11 +158,14 @@ function Todo() {
       const date = row.ReviewDate.toString();
       row.ReviewDate = moment(date);
 
+      //update the task
+      row.TaskId = row.TaskId[1];
       //remove the isNew Property if it exists
       if (row?.hasOwnProperty("isNew")) {
         delete row.isNew;
       }
 
+      console.log("ROW!", row);
       if (index > -1) {
         let item = newData[index];
 
@@ -167,10 +201,20 @@ function Todo() {
 
   const columns = [
     {
-      title: "Task",
+      title: "Work Task",
       dataIndex: "Task",
       width: "25%",
       editable: true,
+    },
+    {
+      title: "Task",
+      dataIndex: "TaskId",
+      width: "25%",
+      editable: true,
+      render: (record) => {
+        let foundTask = tasks?.find((x) => x.TaskId === record);
+        return <div>{foundTask ? foundTask.Name : ""}</div>;
+      },
     },
     {
       title: "Status",
@@ -263,6 +307,7 @@ function Todo() {
       Progress: "",
       ReviewDate: moment(),
       isNew: true,
+      TaskId: "",
     });
     setData(updatedData);
   };
@@ -292,4 +337,23 @@ function Todo() {
   );
 }
 
-export default Todo;
+function mapStateToProps(state) {
+  return {
+    timecards: state.timecards.usercards,
+    tasks: state.timecards.tasks,
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: {
+      getUserTimecards: bindActionCreators(
+        tcActions.getUserTimecards,
+        dispatch
+      ),
+      updateTimecard: bindActionCreators(tcActions.updateTimecard, dispatch),
+      getTasks: bindActionCreators(tcActions.getTasks, dispatch),
+    },
+  };
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Todo);
