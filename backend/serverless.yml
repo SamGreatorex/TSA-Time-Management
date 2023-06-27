@@ -1,4 +1,3 @@
-	
 # Service name
 service: time-management-backend
 
@@ -12,7 +11,7 @@ custom:
     number: 1
   cors-config:
     origins:
-      - '*'
+      - "*"
     headers:
       - Content-Type
       - X-Amz-Date
@@ -29,7 +28,7 @@ provider:
   stackName: ${opt:stage, self:provider.stage}-${self:service}-deployment
   runtime: nodejs14.x
   memorySize: 8192
-  lambdaHashingVersion: '20201221'
+  lambdaHashingVersion: "20201221"
   versionFunctions: false
   tracing:
     lambda: true
@@ -40,17 +39,18 @@ provider:
     STAGE: ${opt:stage, self:provider.stage}
     TASK_TABLE: ${opt:stage, self:provider.stage}-tsa-tasks
     TIME_CARD_TABLE: ${opt:stage, self:provider.stage}-time-card
+    TODO_TABLE: ${opt:stage, self:provider.stage}-tsa-todo
   iamRoleStatements:
     - Effect: Allow
       Action:
         - lambda:InvokeFunction
       Resource:
-        - '*'      
+        - "*"
     - Effect: Allow
       Action:
         - lambda:InvokeFunction
       Resource:
-        - '*'        
+        - "*"
     - Effect: Allow
       Action:
         - dynamodb:DescribeTable
@@ -61,15 +61,15 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource:
-        - 'arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-time-card'      
-        - 'arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-tasks'
-        - 'arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-users'
+        - "arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-time-card"
+        - "arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-tasks"
+        - "arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-users"
   prune:
     automatic: true
     number: 1
   cors-config:
     origins:
-      - '*'
+      - "*"
     headers:
       - Content-Type
       - X-Amz-Date
@@ -79,7 +79,7 @@ provider:
       - X-Amz-User-Agent
     allowCredentials: false
 functions:
-# Time Tasks
+  # Time Tasks
   createTask:
     handler: handlers/tasks.createTask
     events:
@@ -101,7 +101,7 @@ functions:
           path: tasks
           method: get
           cors: ${self:custom.cors-config}
-# TimeCards
+  # TimeCards
   createTimecard:
     handler: handlers/timecards.createTimecard
     events:
@@ -116,7 +116,36 @@ functions:
           path: /{UserId}/timecard
           method: get
           cors: ${self:custom.cors-config}
-# Testing
+  # ToDo
+  createToDo:
+    handler: handlers/todo.create
+    events:
+      - http:
+          path: todo
+          method: post
+          cors: ${self:custom.cors-config}
+  updateToDo:
+    handler: handlers/todo.update
+    events:
+      - http:
+          path: todo
+          method: patch
+          cors: ${self:custom.cors-config}
+  deleteToDo:
+    handler: handlers/todo.delete
+    events:
+      - http:
+          path: todo/{Id}
+          method: delete
+          cors: ${self:custom.cors-config}
+  getToDo:
+    handler: handlers/todo.get
+    events:
+      - http:
+          path: todo
+          method: get
+          cors: ${self:custom.cors-config}
+  # Testing
   testLambda:
     handler: handlers/testing.testLambda
     events:
@@ -124,6 +153,7 @@ functions:
           path: testing
           method: post
           cors: ${self:custom.cors-config}
+
 resources:
   Resources:
     # Time Tasks
@@ -142,8 +172,8 @@ resources:
           WriteCapacityUnits: 1
         TableName: ${opt:stage, self:provider.stage}-tsa-tasks
         StreamSpecification:
-          StreamViewType: NEW_AND_OLD_IMAGES          
-# TimeCard
+          StreamViewType: NEW_AND_OLD_IMAGES
+    # TimeCard
     TimeCardDynamoDbTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
@@ -160,7 +190,7 @@ resources:
         TableName: ${opt:stage, self:provider.stage}-time-card
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES
-  # Users
+    # Users
     TSAUsersDynamoDbTable:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Delete
@@ -177,6 +207,24 @@ resources:
         TableName: ${opt:stage, self:provider.stage}-tsa-users
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES
+    # Todo
+    TodoDynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Delete
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: Id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: Id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${opt:stage, self:provider.stage}-tsa-todo
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+
 package:
   exclude:
     - .nyc_output/**

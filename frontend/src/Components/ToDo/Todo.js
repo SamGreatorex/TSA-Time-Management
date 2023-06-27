@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import * as todoApi from "../../apis/todo";
 import {
   Form,
   Popconfirm,
@@ -8,22 +9,13 @@ import {
   DatePicker,
   Select,
   Tag,
+  Button,
 } from "antd";
+import { v4 as uuid } from "uuid";
 import moment from "moment";
 const { TextArea } = Input;
 
 function Todo() {
-  const originData = [];
-  for (let i = 0; i < 10; i++) {
-    originData.push({
-      id: i.toString(),
-      task: `Edward ${i}`,
-      status: "New",
-      progress: `London Park no. ${i}`,
-      reviewDate: moment(),
-    });
-  }
-
   const statusOptions = [
     {
       value: "New",
@@ -42,6 +34,7 @@ function Todo() {
       label: "Waiting",
     },
   ];
+
   const EditableCell = ({
     editing,
     dataIndex,
@@ -52,10 +45,10 @@ function Todo() {
     ...restProps
   }) => {
     let inputNode = <Input />;
-    if (dataIndex === "reviewDate")
-      inputNode = <DatePicker formate="DD-MM-YYYY" />;
-    if (dataIndex === "progress") inputNode = <TextArea />;
-    if (dataIndex === "status")
+    if (dataIndex === "ReviewDate")
+      inputNode = <DatePicker format="DD-MM-YYYY" />;
+    if (dataIndex === "Progress") inputNode = <TextArea />;
+    if (dataIndex === "Status")
       inputNode = (
         <Select
           options={statusOptions}
@@ -64,6 +57,7 @@ function Todo() {
           }}
         />
       );
+
     return (
       <td {...restProps}>
         {editing ? (
@@ -72,12 +66,6 @@ function Todo() {
             style={{
               margin: 0,
             }}
-            rules={[
-              {
-                required: true,
-                message: `Please Input ${title}!`,
-              },
-            ]}
           >
             {inputNode}
           </Form.Item>
@@ -88,60 +76,105 @@ function Todo() {
     );
   };
   const [form] = Form.useForm();
-  const [data, setData] = useState(originData);
+  const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
-  const isEditing = (record) => record.id === editingKey;
+  const isEditing = (record) => record.Id === editingKey;
+
+  useEffect(() => {
+    if (data.length === 0) LoadData();
+
+    if (data[0]?.hasOwnProperty("isNew")) edit(data[0]);
+  }, [data]);
+
+  const LoadData = async () => {
+    const data = await todoApi.listTodo();
+    if (data.length > 0)
+      setData(data.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate)));
+  };
+
   const edit = (record) => {
     console.log("Editing", record);
+    const updatedDate = moment(record.ReviewDate);
+    console.log(updatedDate);
+    record["ReviewDate"] = updatedDate;
     form.setFieldsValue({
-      task: "",
-      status: "",
-      progress: "",
-      reviewDate: "",
+      Task: "",
+      Status: "",
+      Progress: "",
+      ReviewDate: "",
       ...record,
     });
-    setEditingKey(record.id);
+    setEditingKey(record.Id);
   };
-  const cancel = () => {
+  const cancel = (record) => {
+    if (record.isNew) {
+      let updatedData = [...data];
+      updatedData.shift();
+      console.log(updatedData);
+      setData(updatedData);
+    }
+
     setEditingKey("");
   };
   const save = async (key) => {
     try {
       let row = await form.validateFields();
+      console.log("Saving ROw", row);
       const newData = [...data];
-      const index = newData.findIndex((item) => key === item.id);
+      const index = newData.findIndex((item) => key === item.Id);
 
-      //Refort the date to use moment
-      const date = row.reviewDate.toString();
-      row.reviewDate = moment(date);
+      //Reformatt the date to use moment
+      const date = row.ReviewDate.toString();
+      row.ReviewDate = moment(date);
+
+      //remove the isNew Property if it exists
+      if (row?.hasOwnProperty("isNew")) {
+        delete row.isNew;
+      }
 
       if (index > -1) {
-        const item = newData[index];
+        let item = newData[index];
+
+        //remove the isNew Property if it exists
+        if (item.hasOwnProperty("isNew")) {
+          delete item.isNew;
+        }
+
         newData.splice(index, 1, {
           ...item,
           ...row,
         });
-        setData(newData);
+
+        await todoApi.createTodo(newData[index]);
+        setData(
+          newData.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate))
+        );
+
         setEditingKey("");
       } else {
         newData.push(row);
-        setData(newData);
+        await todoApi.createTodo(row);
+        setData(
+          newData.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate))
+        );
+
         setEditingKey("");
       }
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
   };
+
   const columns = [
     {
       title: "Task",
-      dataIndex: "task",
+      dataIndex: "Task",
       width: "25%",
       editable: true,
     },
     {
       title: "Status",
-      dataIndex: "status",
+      dataIndex: "Status",
       width: "10%",
       editable: true,
       render: (record) => {
@@ -150,7 +183,7 @@ function Todo() {
         if (record === "Waiting") tagColor = "Red";
         if (record === "Completed") tagColor = "Green";
         return (
-          <Tag color={tagColor} key={record.id}>
+          <Tag color={tagColor} key={record.Id}>
             {record}
           </Tag>
         );
@@ -158,13 +191,13 @@ function Todo() {
     },
     {
       title: "Progress",
-      dataIndex: "progress",
+      dataIndex: "Progress",
       width: "40%",
       editable: true,
     },
     {
       title: "Review",
-      dataIndex: "reviewDate",
+      dataIndex: "ReviewDate",
       width: "40%",
       editable: true,
       render: (record) => {
@@ -179,15 +212,18 @@ function Todo() {
         return editable ? (
           <span>
             <Typography.Link
-              onClick={() => save(record.id)}
+              onClick={() => save(record.Id)}
               style={{
                 marginRight: 8,
               }}
             >
               Save
             </Typography.Link>
-            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>Cancel</a>
+            <Popconfirm
+              title="Sure to cancel?"
+              onConfirm={() => cancel(record)}
+            >
+              <a href="/">Cancel</a>
             </Popconfirm>
           </span>
         ) : (
@@ -217,24 +253,42 @@ function Todo() {
     };
   });
 
+  const OnAddNewRow = async () => {
+    console.log("Adding new row");
+    let updatedData = [...data];
+    updatedData.unshift({
+      Id: uuid().toString(),
+      Task: "",
+      Status: "New",
+      Progress: "",
+      ReviewDate: moment(),
+      isNew: true,
+    });
+    setData(updatedData);
+  };
+
   return (
-    <Form form={form} component={false}>
-      <Table
-        style={{ whiteSpace: "pre" }}
-        components={{
-          body: {
-            cell: EditableCell,
-          },
-        }}
-        bordered
-        dataSource={data}
-        columns={mergedColumns}
-        rowClassName="editable-row"
-        pagination={{
-          onChange: cancel,
-        }}
-      />
-    </Form>
+    <div>
+      <Button onClick={OnAddNewRow}>Add New Record</Button>
+      <Form form={form} component={false}>
+        <Table
+          style={{ whiteSpace: "pre" }}
+          components={{
+            body: {
+              cell: EditableCell,
+            },
+          }}
+          rowKey="Id"
+          bordered
+          dataSource={data}
+          columns={mergedColumns}
+          rowClassName="editable-row"
+          pagination={{
+            onChange: cancel,
+          }}
+        />
+      </Form>
+    </div>
   );
 }
 
