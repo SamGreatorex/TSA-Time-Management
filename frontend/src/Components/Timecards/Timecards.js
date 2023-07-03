@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import moment, { parseZone } from "moment";
 import { v4 as uuid } from "uuid";
-
+import { addTaskToTimecards } from "../../utils/helpers";
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -192,13 +192,7 @@ function Timecards({ actions, timecards, tasks }) {
   };
 
   const OnAddTask = async (task) => {
-    let updatedTasks = [...currentTimecard.AvailableTasks];
-    if (!updatedTasks.find((x) => x.TaskId === task[1])) {
-      updatedTasks.push(tasks.find((x) => x.TaskId === task[1]));
-      let updatedTimecard = { ...currentTimecard };
-      updatedTimecard.AvailableTasks = updatedTasks;
-      actions.updateTimecard(updatedTimecard);
-    }
+    await addTaskToTimecards(currentTimecard, tasks, task);
   };
 
   const onUpdateTask = async (task) => {

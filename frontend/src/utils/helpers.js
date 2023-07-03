@@ -1,3 +1,6 @@
+import { updateTimecard } from "../redux/actions/timecards";
+import store from "../redux/store";
+
 export async function getTaskSelectOptions(tasks) {
   const options = [];
   if (tasks?.length === 0) return;
@@ -17,4 +20,15 @@ export async function getTaskSelectOptions(tasks) {
         });
   }
   return options;
+}
+
+//Function that adds a task to a current timecard
+export async function addTaskToTimecards(currentTimecard, tasks, task) {
+  let updatedTasks = [...currentTimecard.AvailableTasks];
+  if (!updatedTasks.find((x) => x.TaskId === task[1])) {
+    updatedTasks.push(tasks.find((x) => x.TaskId === task[1]));
+    let updatedTimecard = { ...currentTimecard };
+    updatedTimecard.AvailableTasks = updatedTasks;
+    store.dispatch(updateTimecard(updatedTimecard));
+  }
 }
