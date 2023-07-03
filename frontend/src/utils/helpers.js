@@ -113,7 +113,9 @@ export async function OnUpdateTask(
   store.dispatch(updateTimecard(updatedTimeCard));
 }
 
-export async function getTaskSelectOptions(tasks) {
+export async function GetTaskSelectOptions() {
+  const state = store.getState();
+  const tasks = state.timecards.tasks;
   const options = [];
   if (tasks?.length === 0) return;
   let taskSorted = tasks

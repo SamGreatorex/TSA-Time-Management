@@ -17,7 +17,7 @@ import {
 } from "antd";
 import { v4 as uuid } from "uuid";
 import moment from "moment";
-import { getTaskSelectOptions } from "../../utils/helpers";
+import { GetTaskSelectOptions } from "../../utils/helpers";
 
 const { TextArea } = Input;
 
@@ -44,22 +44,24 @@ function Todo({ actions, timecards, tasks }) {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
-  const [taskSelectOptions, setTaskSelectOptions] = useState("");
+  const [taskSelectOptions, setTaskSelectOptions] =
+    useState(GetTaskSelectOptions);
   const isEditing = (record) => record.Id === editingKey;
 
   useEffect(() => {
     if (!timecards || timecards.length === 0) actions.getUserTimecards("samg");
     if (!tasks || tasks.length === 0) actions.getTasks();
     if (data.length === 0) LoadData();
+    getSelectOptions();
   }, []);
 
   useEffect(() => {
     if (data[0]?.hasOwnProperty("isNew")) edit(data[0]);
   }, [data]);
 
-  useEffect(() => {
-    if (tasks.length > 0) getSelectOptions();
-  }, [tasks]);
+  // useEffect(() => {
+  //   if (tasks.length > 0) getSelectOptions();
+  // }, [tasks]);
 
   const EditableCell = ({
     editing,
@@ -112,7 +114,7 @@ function Todo({ actions, timecards, tasks }) {
   };
 
   const getSelectOptions = async () => {
-    const selectOptions = await getTaskSelectOptions(tasks);
+    const selectOptions = await GetTaskSelectOptions();
     setTaskSelectOptions(selectOptions);
   };
 

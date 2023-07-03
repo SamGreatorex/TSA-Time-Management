@@ -7,7 +7,6 @@ import {
   Button,
   Table,
   Input,
-  Modal,
   Form,
   Cascader,
 } from "antd";
@@ -21,6 +20,7 @@ import {
   CreateNewTimecard,
   OnAddNewTask,
   OnUpdateTask,
+  GetTaskSelectOptions,
 } from "../../utils/helpers";
 const { TextArea } = Input;
 const { Option } = Select;
@@ -116,60 +116,13 @@ function Timecards({ actions, timecards, tasks }) {
   ];
 
   const configureTaskSelectOptions = async () => {
-    const options = [];
-    if (tasks?.length === 0) return;
-    let taskSorted = tasks
-      .filter((x) => x.IsVisible)
-      .sort((a, b) => (a.Name.toLowerCase() > b.Name.toLowerCase() ? 1 : -1));
-    for (let i = 0; i < taskSorted.length; i++) {
-      let d = taskSorted[i];
-      options.find((x) => x.value === d.Type)
-        ? options
-            .find((x) => x.value === d.Type)
-            .children.push({ value: d.TaskId, label: d.Name })
-        : options.push({
-            value: d.Type,
-            label: d.Type,
-            children: [{ value: d.TaskId, label: d.Name }],
-          });
-    }
-    setTaskSelectOptions(options);
+    let taskOption = await GetTaskSelectOptions();
+    setTaskSelectOptions(taskOption);
   };
 
   const OnStartTask = async (record) => {
     await OnAddNewTask(currentTimecard.TimeCardId, record.TaskId);
-    //await onCreateTaskTimeEntry(currentTimecard, record);
-    // let existingTask = await getExistingTask(record.TaskId);
-
-    // //check if task already exists
-    // let newTask = {
-    //   StartTime: existingTask?.StartTime
-    //     ? existingTask.StartTime
-    //     : moment().toISOString(),
-    //   totalDuration: existingTask?.totalDuration
-    //     ? existingTask.totalDuration
-    //     : 0,
-    //   TaskId: existingTask?.TaskId ? existingTask.TaskId : uuid(),
-    //   TaskTypeId: record.TaskId,
-    //   Notes: existingTask?.Notes ? existingTask.Notes : [],
-    //   IsInProgress: true,
-    //   TaskStartTime: moment().toISOString(),
-    // };
-
-    // onUpdateTask(newTask);
     setUpdatingTask(true);
-  };
-
-  const getExistingTask = async (taskId) => {
-    let existingTask = {
-      ...currentTimecard.Tasks?.find(
-        (x) =>
-          x.TaskTypeId === taskId &&
-          moment(x.StartTime).startOf("day").toString() ===
-            moment().startOf("day").toString()
-      ),
-    };
-    return existingTask;
   };
 
   const OnEndTask = async (record) => {
@@ -195,18 +148,6 @@ function Timecards({ actions, timecards, tasks }) {
       note,
       "false"
     );
-    // notes.push({
-    //   noteId: uuid(),
-    //   StartTime: task.TaskStartTime,
-    //   duration: minutes,
-    //   note: tcDescription,
-    // });
-
-    // delete task.TaskStartTime;
-    // task.totalDuration = parseInt(minutes) + parseInt(task.totalDuration);
-    // task.Notes = notes;
-    // task.IsInProgress = false;
-    // await onUpdateTask(task);
     setUpdatingTask(false);
   };
 
