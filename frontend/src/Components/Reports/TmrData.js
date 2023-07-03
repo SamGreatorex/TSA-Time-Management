@@ -107,10 +107,6 @@ function TmrData({ timecards, actions }) {
 
     setTMRData(TMRData);
     setDisplayData(TMRData);
-    console.log(
-      "!!! Tasks",
-      TMRData.map((x) => x.noteId)
-    );
   };
 
   const OnTMRTypeChanged = async (type) => {

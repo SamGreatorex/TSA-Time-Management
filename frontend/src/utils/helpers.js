@@ -113,6 +113,86 @@ export async function OnUpdateTask(
   store.dispatch(updateTimecard(updatedTimeCard));
 }
 
+export async function AddTaskNote(timecardId, tasktypeId, note) {
+  const state = store.getState();
+  const timecard = state.timecards.usercards.find(
+    (x) => x.TimeCardId === timecardId
+  );
+  let allTasks = [];
+
+  //Get the Existing Task
+  let existingTask = {
+    ...timecard.Tasks?.find(
+      (x) =>
+        x.TaskTypeId === tasktypeId &&
+        moment(x.StartTime).startOf("day").toString() ===
+          moment().startOf("day").toString()
+    ),
+  };
+
+  const taskId =
+    Object.keys(existingTask).length === 0 ? uuid() : existingTask.TaskId;
+  if (Object.keys(existingTask).length === 0) {
+    console.log("No Task Found");
+    //create a new task
+    let newTask = {
+      StartTime: moment().toISOString(),
+      totalDuration: note.duration,
+      TaskId: taskId,
+      TaskTypeId: tasktypeId,
+      Notes: [note],
+      IsInProgress: false,
+      TaskStartTime: moment().toISOString(),
+    };
+    allTasks = [...timecard.Tasks];
+    allTasks.push(newTask);
+    let updatedTimeCard = { ...timecard };
+    updatedTimeCard.Tasks = allTasks;
+    //store.dispatch(updateTimecard(updatedTimeCard));
+
+    //Run Method to add available task
+    const task = state.timecards.tasks?.find((x) => x.TaskId === tasktypeId);
+    let updatedTasks = [...timecard.AvailableTasks];
+    if (!updatedTasks.find((x) => x.TaskId === tasktypeId)) {
+      updatedTasks.push({ ...task });
+      updatedTimeCard.AvailableTasks = updatedTasks;
+    }
+    store.dispatch(updateTimecard(updatedTimeCard));
+  } else {
+    console.log("Existing Task Found", existingTask);
+    let existingNotes =
+      existingTask.Notes.length > 0 ? [...existingTask.Notes] : [];
+    if (note) {
+      existingNotes.push(note);
+    }
+    //if task does not exist create new
+    let updatedTask = {
+      StartTime: existingTask?.StartTime,
+      totalDuration:
+        parseInt(existingTask.totalDuration) + parseInt(note.duration),
+      TaskId: existingTask.TaskId,
+      TaskTypeId: existingTask.TaskTypeId,
+      Notes: existingNotes,
+      IsInProgress: "false",
+      TaskStartTime: existingTask.TaskStartTime,
+    };
+    allTasks = [...timecard.Tasks.filter((x) => x.TaskId !== taskId)];
+    allTasks.push(updatedTask);
+    let updatedTimeCard = { ...timecard };
+    updatedTimeCard.Tasks = allTasks;
+    store.dispatch(updateTimecard(updatedTimeCard));
+  }
+}
+
+export async function GetCurrentTimecard() {
+  const state = store.getState();
+  const timecard = state.timecards.usercards.find(
+    (x) =>
+      moment(x.StartDate).toString() === moment().startOf("isoWeek").toString()
+  );
+  return { ...timecard };
+}
+
 export async function GetTaskSelectOptions() {
   const state = store.getState();
   const tasks = state.timecards.tasks;

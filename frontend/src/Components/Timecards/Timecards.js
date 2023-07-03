@@ -79,7 +79,6 @@ function Timecards({ actions, timecards, tasks }) {
               moment(x.StartTime).startOf("day").toString() ===
                 moment().startOf("day").toString()
           ) || null;
-        console.log("!!1, tc", record.TaskId, tc);
         const RecordUpdating = currentTimecard.Tasks?.find(
           (x) => x.IsInProgress && x.IsInProgress === true
         );
@@ -157,16 +156,6 @@ function Timecards({ actions, timecards, tasks }) {
 
   const OnAddTask = async (task) => {
     await AddNewAvailableTask(task[1], currentTimecard.TimeCardId);
-  };
-
-  const onUpdateTask = async (task) => {
-    let allTasks = [
-      ...currentTimecard.Tasks.filter((x) => x.TaskId !== task.TaskId),
-    ];
-    allTasks.push(task);
-    let updatedTimeCard = { ...currentTimecard };
-    updatedTimeCard.Tasks = allTasks;
-    actions.updateTimecard(updatedTimeCard);
   };
 
   const onCreateWeeksCard = async () => {

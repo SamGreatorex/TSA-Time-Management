@@ -14,10 +14,20 @@ import {
   Tag,
   Button,
   Cascader,
+  Modal,
+  Space,
 } from "antd";
 import { v4 as uuid } from "uuid";
-import moment from "moment";
-import { GetTaskSelectOptions } from "../../utils/helpers";
+import moment, { min } from "moment";
+import {
+  AddTaskNote,
+  GetCurrentTimecard,
+  GetTaskSelectOptions,
+  OnAddNewTask,
+  OnUpdateTask,
+  UpdateTaskEntry,
+} from "../../utils/helpers";
+import { current } from "@reduxjs/toolkit";
 
 const { TextArea } = Input;
 
@@ -44,9 +54,11 @@ function Todo({ actions, timecards, tasks }) {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
+  const [taskSaving, setTaskSaving] = useState("");
   const [taskSelectOptions, setTaskSelectOptions] =
     useState(GetTaskSelectOptions);
   const isEditing = (record) => record.Id === editingKey;
+  const [minutes, setMinutes] = useState(null);
 
   useEffect(() => {
     if (!timecards || timecards.length === 0) actions.getUserTimecards("samg");
@@ -58,10 +70,6 @@ function Todo({ actions, timecards, tasks }) {
   useEffect(() => {
     if (data[0]?.hasOwnProperty("isNew")) edit(data[0]);
   }, [data]);
-
-  // useEffect(() => {
-  //   if (tasks.length > 0) getSelectOptions();
-  // }, [tasks]);
 
   const EditableCell = ({
     editing,
@@ -153,6 +161,31 @@ function Todo({ actions, timecards, tasks }) {
 
     setEditingKey("");
   };
+
+  const OnSaveWithMinutes = async () => {
+    //save timecard entry
+    let row = await form.validateFields();
+    let progressNote = row.Progress.split("\n")[0];
+
+    let taskId = Array.isArray(row.TaskId) ? row.TaskId[1] : row.TaskId;
+    if (taskId) {
+      //Need to save the time to the task
+
+      const timecard = await GetCurrentTimecard();
+      let note = {
+        noteId: uuid(),
+        StartTime: moment().toISOString(),
+        duration: parseInt(minutes),
+        note: progressNote,
+      };
+      await AddTaskNote(timecard.TimeCardId, taskId, note);
+
+      await save(taskSaving);
+
+      setMinutes(null);
+      setTaskSaving(null);
+    }
+  };
   const save = async (key) => {
     try {
       let row = await form.validateFields();
@@ -165,7 +198,9 @@ function Todo({ actions, timecards, tasks }) {
       row.ReviewDate = moment(date);
 
       //update the task
-      row.TaskId = row.TaskId[1];
+      console.log("Updating row", row.TaskId[0]);
+      row.TaskId = Array.isArray(row.TaskId) ? row.TaskId[1] : row.TaskId;
+
       //remove the isNew Property if it exists
       if (row?.hasOwnProperty("isNew")) {
         delete row.isNew;
@@ -215,7 +250,7 @@ function Todo({ actions, timecards, tasks }) {
     {
       title: "Task",
       dataIndex: "TaskId",
-      width: "20%",
+      width: "15%",
       editable: true,
       render: (record) => {
         let foundTask = tasks?.find((x) => x.TaskId === record);
@@ -242,13 +277,13 @@ function Todo({ actions, timecards, tasks }) {
     {
       title: "Progress",
       dataIndex: "Progress",
-      width: "40%",
+      width: "35%",
       editable: true,
     },
     {
       title: "Person",
       dataIndex: "Person",
-      width: "10%",
+
       editable: true,
     },
     {
@@ -263,11 +298,12 @@ function Todo({ actions, timecards, tasks }) {
     {
       title: "operation",
       dataIndex: "operation",
-      width: "10%",
+      width: "6%",
       render: (_, record) => {
         const editable = isEditing(record);
+        console.log("!!TaskID", record);
         return editable ? (
-          <span>
+          <Space direction="vertical">
             <Typography.Link
               onClick={() => save(record.Id)}
               style={{
@@ -276,13 +312,23 @@ function Todo({ actions, timecards, tasks }) {
             >
               Save
             </Typography.Link>
+            {record.TaskId !== "" && (
+              <Typography.Link
+                onClick={() => setTaskSaving(record.Id)}
+                style={{
+                  marginRight: 8,
+                }}
+              >
+                Save (+Hours)
+              </Typography.Link>
+            )}
             <Popconfirm
               title="Sure to cancel?"
               onConfirm={() => cancel(record)}
             >
               <a href="/">Cancel</a>
             </Popconfirm>
-          </span>
+          </Space>
         ) : (
           <Typography.Link
             disabled={editingKey !== ""}
@@ -346,6 +392,20 @@ function Todo({ actions, timecards, tasks }) {
           }}
         />
       </Form>
+      <Modal
+        title="Input Total Minutes On Task"
+        open={taskSaving}
+        onOk={OnSaveWithMinutes}
+        onCancel={() => {
+          setMinutes(null);
+          setTaskSaving(null);
+        }}
+      >
+        <div>
+          Minutes:
+          <Input onChange={(value) => setMinutes(value.target.value)} />
+        </div>
+      </Modal>
     </div>
   );
 }
