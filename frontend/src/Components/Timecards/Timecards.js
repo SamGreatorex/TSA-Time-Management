@@ -16,7 +16,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import moment, { parseZone } from "moment";
 import { v4 as uuid } from "uuid";
-import { addTaskToTimecards } from "../../utils/helpers";
+import { addTaskToTimecards, onCreateTaskTimeEntry } from "../../utils/helpers";
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -130,24 +130,25 @@ function Timecards({ actions, timecards, tasks }) {
   };
 
   const OnStartTask = async (record) => {
-    let existingTask = await getExistingTask(record.TaskId);
+    await onCreateTaskTimeEntry(currentTimecard, record);
+    // let existingTask = await getExistingTask(record.TaskId);
 
-    //check if task already exists
-    let newTask = {
-      StartTime: existingTask?.StartTime
-        ? existingTask.StartTime
-        : moment().toISOString(),
-      totalDuration: existingTask?.totalDuration
-        ? existingTask.totalDuration
-        : 0,
-      TaskId: existingTask?.TaskId ? existingTask.TaskId : uuid(),
-      TaskTypeId: record.TaskId,
-      Notes: existingTask?.Notes ? existingTask.Notes : [],
-      IsInProgress: true,
-      TaskStartTime: moment().toISOString(),
-    };
+    // //check if task already exists
+    // let newTask = {
+    //   StartTime: existingTask?.StartTime
+    //     ? existingTask.StartTime
+    //     : moment().toISOString(),
+    //   totalDuration: existingTask?.totalDuration
+    //     ? existingTask.totalDuration
+    //     : 0,
+    //   TaskId: existingTask?.TaskId ? existingTask.TaskId : uuid(),
+    //   TaskTypeId: record.TaskId,
+    //   Notes: existingTask?.Notes ? existingTask.Notes : [],
+    //   IsInProgress: true,
+    //   TaskStartTime: moment().toISOString(),
+    // };
 
-    onUpdateTask(newTask);
+    // onUpdateTask(newTask);
     setUpdatingTask(true);
   };
 

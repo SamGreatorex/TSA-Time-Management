@@ -32,3 +32,40 @@ export async function addTaskToTimecards(currentTimecard, tasks, task) {
     store.dispatch(updateTimecard(updatedTimecard));
   }
 }
+
+//Function to create a new task
+export async function onCreateTaskTimeEntry(currentTimecard, task) {
+  let existingTask = {
+    ...currentTimecard.Tasks?.find(
+      (x) =>
+        x.TaskTypeId === task.taskId &&
+        moment(x.StartTime).startOf("day").toString() ===
+          moment().startOf("day").toString()
+    ),
+  };
+
+  //check if task already exists
+  let newTask = {
+    StartTime: existingTask?.StartTime
+      ? existingTask.StartTime
+      : moment().toISOString(),
+    totalDuration: existingTask?.totalDuration ? existingTask.totalDuration : 0,
+    TaskId: existingTask?.TaskId ? existingTask.TaskId : uuid(),
+    TaskTypeId: record.TaskId,
+    Notes: existingTask?.Notes ? existingTask.Notes : [],
+    IsInProgress: true,
+    TaskStartTime: moment().toISOString(),
+  };
+
+  onUpdateTask(currentTimecard, newTask);
+}
+
+const onUpdateTask = async (currentTimecard, task) => {
+  let allTasks = [
+    ...currentTimecard.Tasks.filter((x) => x.TaskId !== task.TaskId),
+  ];
+  allTasks.push(task);
+  let updatedTimeCard = { ...currentTimecard };
+  updatedTimeCard.Tasks = allTasks;
+  store.dispatch(updateTimecard(updatedTimecard));
+};
