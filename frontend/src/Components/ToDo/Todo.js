@@ -223,7 +223,7 @@ function Todo({ actions, timecards, tasks }) {
     {
       title: "Status",
       dataIndex: "Status",
-      width: "10%",
+      width: "5%",
       editable: true,
       render: (record) => {
         let tagColor = "blue";
@@ -244,9 +244,15 @@ function Todo({ actions, timecards, tasks }) {
       editable: true,
     },
     {
+      title: "Person",
+      dataIndex: "Person",
+      width: "10%",
+      editable: true,
+    },
+    {
       title: "Review",
       dataIndex: "ReviewDate",
-      width: "10%",
+      width: "5%",
       editable: true,
       render: (record) => {
         return <div>{moment(record).format("ddd DD MMM")}</div>;
