@@ -1,5 +1,22 @@
 import { updateTimecard } from "../redux/actions/timecards";
 import store from "../redux/store";
+import moment from "moment";
+import { v4 as uuid } from "uuid";
+
+export async function CreateNewTimecard(user) {
+  //get all available tasks
+  const state = store.getState();
+  const tasks = state.timecards.tasks;
+  let timecard = {
+    UserId: user,
+    TimeCardId: uuid(),
+    AvailableTasks: tasks.filter((x) => x.Default === true),
+    StartDate: moment().startOf("isoWeek").toString(),
+    EndDate: moment().endOf("isoWeek").toString(),
+    Tasks: [],
+  };
+  store.dispatch(updateTimecard(timecard));
+}
 
 export async function getTaskSelectOptions(tasks) {
   const options = [];
@@ -51,7 +68,7 @@ export async function onCreateTaskTimeEntry(currentTimecard, task) {
       : moment().toISOString(),
     totalDuration: existingTask?.totalDuration ? existingTask.totalDuration : 0,
     TaskId: existingTask?.TaskId ? existingTask.TaskId : uuid(),
-    TaskTypeId: record.TaskId,
+    TaskTypeId: task.TaskId,
     Notes: existingTask?.Notes ? existingTask.Notes : [],
     IsInProgress: true,
     TaskStartTime: moment().toISOString(),
@@ -67,5 +84,5 @@ const onUpdateTask = async (currentTimecard, task) => {
   allTasks.push(task);
   let updatedTimeCard = { ...currentTimecard };
   updatedTimeCard.Tasks = allTasks;
-  store.dispatch(updateTimecard(updatedTimecard));
+  store.dispatch(updateTimecard(updatedTimeCard));
 };

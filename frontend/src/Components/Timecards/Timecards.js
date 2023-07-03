@@ -16,7 +16,11 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import moment, { parseZone } from "moment";
 import { v4 as uuid } from "uuid";
-import { addTaskToTimecards, onCreateTaskTimeEntry } from "../../utils/helpers";
+import {
+  CreateNewTimecard,
+  addTaskToTimecards,
+  onCreateTaskTimeEntry,
+} from "../../utils/helpers";
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -207,15 +211,7 @@ function Timecards({ actions, timecards, tasks }) {
   };
 
   const onCreateWeeksCard = async () => {
-    let timecard = {
-      UserId: "samg",
-      TimeCardId: uuid(),
-      AvailableTasks: tasks.filter((x) => x.Default === true),
-      StartDate: moment().startOf("isoWeek").toString(),
-      EndDate: moment().endOf("isoWeek").toString(),
-      Tasks: [],
-    };
-    actions.updateTimecard(timecard);
+    await CreateNewTimecard("samg");
   };
 
   return (
