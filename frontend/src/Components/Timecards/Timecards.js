@@ -17,8 +17,9 @@ import { bindActionCreators } from "redux";
 import moment, { parseZone } from "moment";
 import { v4 as uuid } from "uuid";
 import {
+  AddNewAvailableTask,
   CreateNewTimecard,
-  addTaskToTimecards,
+  OnAddNewTask,
   onCreateTaskTimeEntry,
 } from "../../utils/helpers";
 const { TextArea } = Input;
@@ -44,6 +45,7 @@ function Timecards({ actions, timecards, tasks }) {
         moment(x.StartDate).toString() ===
         moment().startOf("isoWeek").toString()
     );
+    console.log("!!!Curr", cTimeCard);
     setCurrentTimecard(cTimeCard);
     configureTaskSelectOptions();
   }, [timecards]);
@@ -77,6 +79,7 @@ function Timecards({ actions, timecards, tasks }) {
               moment(x.StartTime).startOf("day").toString() ===
                 moment().startOf("day").toString()
           ) || null;
+        console.log("!!1, tc", record.TaskId, tc);
         const RecordUpdating = currentTimecard.Tasks?.find(
           (x) => x.IsInProgress && x.IsInProgress === true
         );
@@ -134,7 +137,8 @@ function Timecards({ actions, timecards, tasks }) {
   };
 
   const OnStartTask = async (record) => {
-    await onCreateTaskTimeEntry(currentTimecard, record);
+    await OnAddNewTask(currentTimecard.TimeCardId, record.TaskId);
+    //await onCreateTaskTimeEntry(currentTimecard, record);
     // let existingTask = await getExistingTask(record.TaskId);
 
     // //check if task already exists
@@ -197,7 +201,7 @@ function Timecards({ actions, timecards, tasks }) {
   };
 
   const OnAddTask = async (task) => {
-    await addTaskToTimecards(currentTimecard, tasks, task);
+    await AddNewAvailableTask(task[1], currentTimecard.TimeCardId);
   };
 
   const onUpdateTask = async (task) => {
