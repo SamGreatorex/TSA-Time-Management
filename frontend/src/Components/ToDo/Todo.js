@@ -119,7 +119,11 @@ function Todo({ actions, timecards, tasks }) {
   const LoadData = async () => {
     const data = await todoApi.listTodo();
     if (data.length > 0)
-      setData(data.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate)));
+      setData(
+        data
+          .filter((x) => x.Status !== "Completed")
+          .sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate))
+      );
   };
 
   const edit = (record) => {
