@@ -203,13 +203,13 @@ function Todo({ actions, timecards, tasks }) {
     {
       title: "Work Task",
       dataIndex: "Task",
-      width: "25%",
+      width: "20%",
       editable: true,
     },
     {
       title: "Task",
       dataIndex: "TaskId",
-      width: "25%",
+      width: "20%",
       editable: true,
       render: (record) => {
         let foundTask = tasks?.find((x) => x.TaskId === record);
@@ -242,15 +242,16 @@ function Todo({ actions, timecards, tasks }) {
     {
       title: "Review",
       dataIndex: "ReviewDate",
-      width: "40%",
+      width: "10%",
       editable: true,
       render: (record) => {
-        return <div>{moment(record).format("dddd DD MMM")}</div>;
+        return <div>{moment(record).format("ddd DD MMM")}</div>;
       },
     },
     {
       title: "operation",
       dataIndex: "operation",
+      width: "10%",
       render: (_, record) => {
         const editable = isEditing(record);
         return editable ? (
@@ -317,7 +318,7 @@ function Todo({ actions, timecards, tasks }) {
       <Button onClick={OnAddNewRow}>Add New Record</Button>
       <Form form={form} component={false}>
         <Table
-          style={{ whiteSpace: "pre" }}
+          style={{ padding: "10px" }}
           components={{
             body: {
               cell: EditableCell,
