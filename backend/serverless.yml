@@ -64,6 +64,7 @@ provider:
         - "arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-time-card"
         - "arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-tasks"
         - "arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-users"
+        - "arn:aws:dynamodb:eu-west-2:560506968350:table/${opt:stage, self:provider.stage}-tsa-todo"
   prune:
     automatic: true
     number: 1
