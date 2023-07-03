@@ -20,7 +20,7 @@ import {
   AddNewAvailableTask,
   CreateNewTimecard,
   OnAddNewTask,
-  onCreateTaskTimeEntry,
+  OnUpdateTask,
 } from "../../utils/helpers";
 const { TextArea } = Input;
 const { Option } = Select;
@@ -174,25 +174,39 @@ function Timecards({ actions, timecards, tasks }) {
 
   const OnEndTask = async (record) => {
     let task = { ...currentTimecard.Tasks.find((x) => x.IsInProgress) };
-    let notes = [...task.Notes];
+    //let notes = [...task.Notes];
 
     let startDate = await formatDate(moment(task.TaskStartTime));
     let endDate = await formatDate(moment());
     var duration = moment.duration(moment(endDate).diff(startDate));
     var minutes = duration.asMinutes() === 0 ? 15 : duration.asMinutes();
 
-    notes.push({
+    let note = {
       noteId: uuid(),
       StartTime: task.TaskStartTime,
       duration: minutes,
       note: tcDescription,
-    });
+    };
+    let totalDuration = parseInt(minutes) + parseInt(task.totalDuration);
+    await OnUpdateTask(
+      currentTimecard.TimeCardId,
+      task.TaskId,
+      totalDuration,
+      note,
+      "false"
+    );
+    // notes.push({
+    //   noteId: uuid(),
+    //   StartTime: task.TaskStartTime,
+    //   duration: minutes,
+    //   note: tcDescription,
+    // });
 
-    delete task.TaskStartTime;
-    task.totalDuration = parseInt(minutes) + parseInt(task.totalDuration);
-    task.Notes = notes;
-    task.IsInProgress = false;
-    await onUpdateTask(task);
+    // delete task.TaskStartTime;
+    // task.totalDuration = parseInt(minutes) + parseInt(task.totalDuration);
+    // task.Notes = notes;
+    // task.IsInProgress = false;
+    // await onUpdateTask(task);
     setUpdatingTask(false);
   };
 
