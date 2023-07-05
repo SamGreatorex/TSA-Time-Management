@@ -277,10 +277,11 @@ function Todo({ actions, timecards, tasks }) {
     },
     {
       title: "Progress",
+      dataIndex: "Progress",
       width: "35%",
       editable: true,
       render: (record) => {
-        const rows = record.Progress.split("\n");
+        const rows = record.split("\n");
         return (
           <List>
             {rows.map((row, index) => {

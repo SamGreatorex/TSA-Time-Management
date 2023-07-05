@@ -55,6 +55,7 @@ function WorkSummary({ timecards, actions, tasks }) {
     },
     {
       title: "Progress",
+      dataIndex: "Progress",
       render: (record) => {
         const rows = record.Progress.split("\n");
         return (
