@@ -15,6 +15,7 @@ import {
   Button,
   Cascader,
   Modal,
+  List,
   Space,
 } from "antd";
 import { v4 as uuid } from "uuid";
@@ -276,14 +277,26 @@ function Todo({ actions, timecards, tasks }) {
     },
     {
       title: "Progress",
-      dataIndex: "Progress",
       width: "35%",
       editable: true,
+      render: (record) => {
+        const rows = record.Progress.split("\n");
+        return (
+          <List>
+            {rows.map((row, index) => {
+              return (
+                <List.Item style={{ padding: "0px" }} key={index}>
+                  {row}
+                </List.Item>
+              );
+            })}
+          </List>
+        );
+      },
     },
     {
       title: "Person",
       dataIndex: "Person",
-
       editable: true,
     },
     {
@@ -292,7 +305,7 @@ function Todo({ actions, timecards, tasks }) {
       width: "5%",
       editable: true,
       render: (record) => {
-        return <div>{moment(record).format("ddd DD MMM")}</div>;
+        return <div>{moment(record).format("ddd DD MMM YY")}</div>;
       },
     },
     {
@@ -301,7 +314,6 @@ function Todo({ actions, timecards, tasks }) {
       width: "6%",
       render: (_, record) => {
         const editable = isEditing(record);
-        console.log("!!TaskID", record);
         return editable ? (
           <Space direction="vertical">
             <Typography.Link
@@ -319,7 +331,7 @@ function Todo({ actions, timecards, tasks }) {
                   marginRight: 8,
                 }}
               >
-                Save (+Hours)
+                Save (+time)
               </Typography.Link>
             )}
             <Popconfirm

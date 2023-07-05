@@ -93,7 +93,7 @@ module.exports.delete = async (event, context, callback) => {
   }
 };
 
-module.exports.get = async (event, context, callback) => {
+module.exports.list = async (event, context, callback) => {
   //#region Validation
   try {
     //Authenticate
@@ -122,6 +122,39 @@ module.exports.get = async (event, context, callback) => {
       ProjectionExpression
     );
     console.log("Request response", requests);
+    return responseLib.success(requests);
+  } catch (error) {
+    console.log("Error", error);
+    return responseLib.failure(
+      error.statusCode.status,
+      error.statusCode.message
+    );
+  }
+};
+
+module.exports.get = async (event, context, callback) => {
+  //#region Validation
+  try {
+    //Authenticate
+    await auth.authenticateRequest(event, null, ["TaskId"]);
+    //#endregion
+    const pathParameters = event.pathParameters;
+    //List todo items for Task
+    let FilterExpression = "#TaskId = :TaskId";
+    const ExpressionAttributeNames = {
+      "#TaskId": "TaskId",
+    };
+    let ExpressionAttributeValues = {
+      ":TaskId": pathParameters.TaskId,
+    };
+
+    var requests = await dynamo.dynamoScan(
+      dynamoTable,
+      FilterExpression,
+      ExpressionAttributeNames,
+      ExpressionAttributeValues
+    );
+    console.log("List Todo Request response", requests);
     return responseLib.success(requests);
   } catch (error) {
     console.log("Error", error);

@@ -75,3 +75,21 @@ export const deleteTodo = async (itemId) => {
     handleError(error);
   }
 };
+
+export const getTodo = async (taskId) => {
+  console.log(`Getting ToDo Items for TaskID: ${taskId}`);
+
+  try {
+    let result = await axios({
+      url: `${globals.BACKEND_URL}/todo/${taskId}`,
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse(result);
+  } catch (error) {
+    console.error("error for api ", error);
+    handleError(error);
+  }
+};

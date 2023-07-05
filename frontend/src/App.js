@@ -12,6 +12,7 @@ import WeeklyReport from "./Components/Reports/weeklyReport";
 import MonthlyReport from "./Components/Reports/monthlyReport";
 import TmrData from "./Components/Reports/TmrData";
 import ToDo from "./Components/ToDo/Todo";
+import ToDoData from "./Components/Reports/workSummary";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/reports-daily" element={<DailyReport />} />
             <Route path="/reports-weekly" element={<WeeklyReport />} />
             <Route path="/reports-monthly" element={<MonthlyReport />} />
+            <Route path="/todo-data" element={<ToDoData />} />
             <Route path="/todo" element={<ToDo />} />
             <Route path="/tmr-data" element={<TmrData />} />
           </Routes>

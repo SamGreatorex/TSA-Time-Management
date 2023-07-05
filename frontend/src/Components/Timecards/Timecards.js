@@ -45,7 +45,6 @@ function Timecards({ actions, timecards, tasks }) {
         moment(x.StartDate).toString() ===
         moment().startOf("isoWeek").toString()
     );
-    console.log("!!!Curr", cTimeCard);
     setCurrentTimecard(cTimeCard);
     configureTaskSelectOptions();
   }, [timecards]);

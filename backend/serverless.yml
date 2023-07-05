@@ -139,11 +139,18 @@ functions:
           path: todo/{Id}
           method: delete
           cors: ${self:custom.cors-config}
+  listToDo:
+    handler: handlers/todo.list
+    events:
+      - http:
+          path: todo
+          method: get
+          cors: ${self:custom.cors-config}
   getToDo:
     handler: handlers/todo.get
     events:
       - http:
-          path: todo
+          path: todo/{TaskId}
           method: get
           cors: ${self:custom.cors-config}
   # Testing
