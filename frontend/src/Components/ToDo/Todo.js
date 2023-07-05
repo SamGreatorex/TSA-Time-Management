@@ -84,7 +84,10 @@ function Todo({ actions, timecards, tasks }) {
     let inputNode = <Input />;
     if (dataIndex === "ReviewDate")
       inputNode = <DatePicker format="DD-MM-YYYY" />;
-    if (dataIndex === "Progress") inputNode = <TextArea />;
+    if (dataIndex === "Progress") {
+      const rows = record.Progress.split("\n");
+      inputNode = <TextArea rows={rows.length + 1} />;
+    }
     if (dataIndex === "Status")
       inputNode = (
         <Select
