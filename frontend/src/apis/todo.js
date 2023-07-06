@@ -7,7 +7,7 @@ export const listTodo = async () => {
 
   try {
     let result = await axios({
-      url: `${globals.BACKEND_URL}/todo`,
+      url: `${globals.BACKEND_URL}/listTodo`,
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -81,7 +81,7 @@ export const getTodo = async (taskId) => {
 
   try {
     let result = await axios({
-      url: `${globals.BACKEND_URL}/todo/${taskId}`,
+      url: `${globals.BACKEND_URL}/todo/task/${taskId}`,
       method: "GET",
       headers: {
         "Content-Type": "application/json",

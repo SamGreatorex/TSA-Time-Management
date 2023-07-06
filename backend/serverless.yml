@@ -143,14 +143,14 @@ functions:
     handler: handlers/todo.list
     events:
       - http:
-          path: todo
+          path: listTodo
           method: get
           cors: ${self:custom.cors-config}
   getToDo:
     handler: handlers/todo.get
     events:
       - http:
-          path: todo/{TaskId}
+          path: todo/task/{TaskId}
           method: get
           cors: ${self:custom.cors-config}
   # Testing

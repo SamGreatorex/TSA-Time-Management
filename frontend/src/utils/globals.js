@@ -5,16 +5,16 @@ const getBackendURL = () => {
     host === "time-management-frontend-dev.s3-website.eu-west-2.amazonaws.com"
   ) {
     console.log(
-      "Setting Dev URL - https://pm2vq48up3.execute-api.eu-west-2.amazonaws.com/dev"
+      "Setting Dev URL - https://w0c4hplipl.execute-api.eu-west-2.amazonaws.com/dev"
     );
-    return "https://pm2vq48up3.execute-api.eu-west-2.amazonaws.com/dev";
+    return "https://w0c4hplipl.execute-api.eu-west-2.amazonaws.com/dev";
   } else if (
     host === "time-management-frontend-prod.s3-website.eu-west-2.amazonaws.com"
   ) {
     console.log(
-      "Setting Prod URL - https://ofytpkmiue.execute-api.eu-west-2.amazonaws.com/prod"
+      "Setting Prod URL -  https://my7yhf9xc7.execute-api.eu-west-2.amazonaws.com/prod"
     );
-    return "https://ofytpkmiue.execute-api.eu-west-2.amazonaws.com/prod";
+    return "https://my7yhf9xc7.execute-api.eu-west-2.amazonaws.com/prod";
   } else {
     return "http://localhost:4000/dev";
   }
