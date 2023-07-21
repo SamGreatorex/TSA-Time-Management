@@ -126,7 +126,7 @@ export async function AddTaskNote(timecardId, tasktypeId, note) {
       (x) =>
         x.TaskTypeId === tasktypeId &&
         moment(x.StartTime).startOf("day").toString() ===
-          moment().startOf("day").toString()
+          moment(note.StartTime).startOf("day").toString()
     ),
   };
 
@@ -136,13 +136,13 @@ export async function AddTaskNote(timecardId, tasktypeId, note) {
     console.log("No Task Found");
     //create a new task
     let newTask = {
-      StartTime: moment().toISOString(),
+      StartTime: moment(note.StartTime).toISOString(),
       totalDuration: note.duration,
       TaskId: taskId,
       TaskTypeId: tasktypeId,
       Notes: [note],
       IsInProgress: false,
-      TaskStartTime: moment().toISOString(),
+      TaskStartTime: moment(note.StartTime).toISOString(),
     };
     allTasks = [...timecard.Tasks];
     allTasks.push(newTask);

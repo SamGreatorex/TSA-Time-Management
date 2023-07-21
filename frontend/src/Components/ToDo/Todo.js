@@ -24,11 +24,7 @@ import {
   AddTaskNote,
   GetCurrentTimecard,
   GetTaskSelectOptions,
-  OnAddNewTask,
-  OnUpdateTask,
-  UpdateTaskEntry,
 } from "../../utils/helpers";
-import { current } from "@reduxjs/toolkit";
 
 const { TextArea } = Input;
 
@@ -60,8 +56,10 @@ function Todo({ actions, timecards, tasks }) {
     useState(GetTaskSelectOptions);
   const isEditing = (record) => record.Id === editingKey;
   const [minutes, setMinutes] = useState(null);
+  const [taskDate, setTaskDate] = useState(moment());
 
   useEffect(() => {
+    console.log("!!!tasks", tasks);
     if (!timecards || timecards.length === 0) actions.getUserTimecards("samg");
     if (!tasks || tasks.length === 0) actions.getTasks();
     if (data.length === 0) LoadData();
@@ -71,6 +69,10 @@ function Todo({ actions, timecards, tasks }) {
   useEffect(() => {
     if (data[0]?.hasOwnProperty("isNew")) edit(data[0]);
   }, [data]);
+
+  useEffect(() => {
+    if (tasks.length > 0) getSelectOptions();
+  }, [tasks]);
 
   const EditableCell = ({
     editing,
@@ -170,15 +172,15 @@ function Todo({ actions, timecards, tasks }) {
     //save timecard entry
     let row = await form.validateFields();
     let progressNote = row.Progress.split("\n")[0];
-
+    console.log("St");
     let taskId = Array.isArray(row.TaskId) ? row.TaskId[1] : row.TaskId;
     if (taskId) {
       //Need to save the time to the task
-
+      console.log("Task Date is ", taskDate.toISOString());
       const timecard = await GetCurrentTimecard();
       let note = {
         noteId: uuid(),
-        StartTime: moment().toISOString(),
+        StartTime: taskDate.toISOString(),
         duration: parseInt(minutes),
         note: progressNote,
       };
@@ -414,12 +416,21 @@ function Todo({ actions, timecards, tasks }) {
         onOk={OnSaveWithMinutes}
         onCancel={() => {
           setMinutes(null);
+          setTaskDate(moment());
           setTaskSaving(null);
         }}
       >
         <div>
           Minutes:
           <Input onChange={(value) => setMinutes(value.target.value)} />
+          <DatePicker
+            placeholder="Date time spent"
+            defaultValue={taskDate}
+            onChange={(value) => {
+              console.log("Date is", value.toISOString());
+              setTaskDate(value);
+            }}
+          />
         </div>
       </Modal>
     </div>
