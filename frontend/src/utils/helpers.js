@@ -81,36 +81,50 @@ export async function OnUpdateTask(
   note,
   IsInProgress
 ) {
-  const state = store.getState();
-  const timecard = state.timecards.usercards.find(
-    (x) => x.TimeCardId === timecardId
+  console.log(
+    "Task in Progress",
+    timecardId,
+    taskId,
+    duration,
+    note,
+    IsInProgress
   );
 
-  //Get the Existing Task.
-  let existingTask = {
-    ...timecard.Tasks?.find((x) => x.TaskId === taskId),
-  };
+  try {
+    const state = store.getState();
+    const timecard = state.timecards.usercards.find(
+      (x) => x.TimeCardId === timecardId
+    );
 
-  let existingNotes = [...existingTask.Notes];
-  if (note) {
-    existingNotes.push(note);
+    //Get the Existing Task.
+    let existingTask = {
+      ...timecard.Tasks?.find((x) => x.TaskId === taskId),
+    };
+
+    let existingNotes = [...existingTask.Notes];
+    if (note) {
+      existingNotes.push(note);
+    }
+
+    //if task does not exist create new
+    let updatedTask = {
+      StartTime: existingTask?.StartTime,
+      totalDuration: duration ? duration : existingTask.totalDuration,
+      TaskId: existingTask.TaskId,
+      TaskTypeId: existingTask.TaskTypeId,
+      Notes: existingNotes,
+      IsInProgress: IsInProgress ? IsInProgress : existingTask.IsInProgress,
+      TaskStartTime: existingTask.TaskStartTime,
+    };
+
+    let allTasks = [...timecard.Tasks.filter((x) => x.TaskId !== taskId)];
+    allTasks.push(updatedTask);
+    let updatedTimeCard = { ...timecard };
+    updatedTimeCard.Tasks = allTasks;
+    store.dispatch(updateTimecard(updatedTimeCard));
+  } catch (error) {
+    console.log("Error updating timecard", error);
   }
-  //if task does not exist create new
-  let updatedTask = {
-    StartTime: existingTask?.StartTime,
-    totalDuration: duration ? duration : existingTask.totalDuration,
-    TaskId: existingTask.TaskId,
-    TaskTypeId: existingTask.TaskTypeId,
-    Notes: existingNotes,
-    IsInProgress: IsInProgress ? IsInProgress : existingTask.IsInProgress,
-    TaskStartTime: existingTask.TaskStartTime,
-  };
-
-  let allTasks = [...timecard.Tasks.filter((x) => x.TaskId !== taskId)];
-  allTasks.push(updatedTask);
-  let updatedTimeCard = { ...timecard };
-  updatedTimeCard.Tasks = allTasks;
-  store.dispatch(updateTimecard(updatedTimeCard));
 }
 
 export async function AddTaskNote(timecardId, tasktypeId, note) {

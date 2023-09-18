@@ -124,7 +124,9 @@ function Timecards({ actions, timecards, tasks }) {
   };
 
   const OnEndTask = async (record) => {
-    let task = { ...currentTimecard.Tasks.find((x) => x.IsInProgress) };
+    let task = {
+      ...currentTimecard.Tasks.find((x) => x.IsInProgress === true),
+    };
     //let notes = [...task.Notes];
 
     let startDate = await formatDate(moment(task.TaskStartTime));
@@ -139,6 +141,7 @@ function Timecards({ actions, timecards, tasks }) {
       note: tcDescription,
     };
     let totalDuration = parseInt(minutes) + parseInt(task.totalDuration);
+
     await OnUpdateTask(
       currentTimecard.TimeCardId,
       task.TaskId,
