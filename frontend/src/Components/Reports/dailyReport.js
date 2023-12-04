@@ -1,19 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  Select,
-  Row,
-  Col,
-  Table,
-  Typography,
-  Space,
-  Button,
-  Modal,
-  Input,
-  Tooltip,
-  Form,
-  Checkbox,
-} from "antd";
-
+import { Select, Row, Col, Table, Typography, Space, Button, Modal, Input, Tooltip, Form, Checkbox } from "antd";
+import { convertMinToStringTime } from "../../utils/utils";
 import * as tcActions from "../../redux/actions/timecards";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -26,10 +13,12 @@ const { Text } = Typography;
 const { TextArea } = Input;
 
 function DailyReport({ actions, timecards, tasks }) {
-  const [currentDate, setCurrentDate] = useState(moment());
-  const [data, setData] = useState([]);
-  const [dataFilter, setDataFilter] = useState([]);
+  const [weeksFilter, setweeksFilter] = useState([]);
+  const [selectedWeek, setSelectedWeek] = useState(moment().startOf("isoWeek"));
+  const [daysFilter, setdaysFilter] = useState([]);
+  const [selectedDate, setselectedDate] = useState(moment());
   const [weeksTimecard, setWeeksTimecard] = useState([]);
+  const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -41,50 +30,74 @@ function DailyReport({ actions, timecards, tasks }) {
       actions.getUserTimecards("samg");
       actions.getTasks();
     } else {
-      resetData(currentDate);
+      resetData(selectedDate);
     }
   }, []);
 
   useEffect(() => {
     if (timecards.length > 0) {
-      resetData(currentDate);
+      populateWeeksFilter();
+      populateDaysFilter();
+      //resetData(selectedDate, moment().startOf("isoWeek").toString());
     }
   }, [timecards]);
 
-  const resetData = async (date) => {
-    setData([]);
-    setCurrentDate(date);
-    let currentTimecard = timecards.find(
-      (x) =>
-        moment(x.StartDate).toString() ===
-        moment().startOf("isoWeek").toString()
-    );
-    setWeeksTimecard(currentTimecard);
+  useEffect(() => {
+    console.log("Selected Date changed", selectedDate, selectedWeek, weeksTimecard);
+    resetData();
+  }, [selectedDate]);
 
-    let allTasks = currentTimecard?.Tasks || [];
+  const populateWeeksFilter = async () => {
+    let weekDates = timecards.map((x) => x.StartDate).sort((a, b) => moment(b) - moment(a));
+    let minutes = data.length > 0 ? data.map((x) => x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
+    let total = await convertMinToStringTime(minutes);
+    let remainingData = await convertMinToStringTime(40 * 5 - minutes);
 
-    let todaysTasks = allTasks.filter(
-      (x) =>
-        moment(x.StartTime).startOf("day").toString() ===
-        moment(date).startOf("day").toString()
-    );
-    let weekDates = [];
-    for (let i = 0; i < allTasks.length; i++) {
-      let task = allTasks[i];
-      let foundDate = weekDates.filter(
-        (x) =>
-          moment(x).startOf("day").toString() ===
-          moment(task.StartTime).startOf("day").toString()
-      );
-      if (foundDate.length === 0) {
-        weekDates.push(task.StartTime);
-      }
+    //Set the UI
+    setweeksFilter([...weekDates]);
+
+    //Set initial Weeks Timecard
+    setWeeksTimecard(timecards.find((x) => moment(x.StartDate).toString() === selectedWeek.toString()));
+  };
+
+  const populateDaysFilter = async (startWeekDate) => {
+    console.log("Populating Available Days for ", startWeekDate);
+    let availableDays = [];
+    let selectedDate = moment(startWeekDate);
+    console.log("selectedDate", selectedDate);
+
+    for (let i = 0; i < 7; i++) {
+      availableDays.push(moment(startWeekDate).add("days", i).toString());
     }
-    setDataFilter([...weekDates]);
-    console.log("Todays Tasks", todaysTasks);
-    setData(
-      todaysTasks.sort((a, b) => moment(b.StartTime) - moment(a.StartTime))
-    );
+    setdaysFilter([...availableDays]);
+    setselectedDate(moment(startWeekDate));
+    // resetData(startWeekDate);
+    console.log(availableDays);
+  };
+
+  const OnWeekChanged = async (date) => {
+    console.log("Selected Week Changed", date);
+    setSelectedWeek(moment(date));
+    let currentTimecard = timecards.find((x) => moment(x.StartDate).toString() === date.toString());
+    console.log("Weeks timecard is", currentTimecard);
+    setWeeksTimecard(currentTimecard);
+    populateDaysFilter(moment(date));
+  };
+
+  const resetData = async () => {
+    console.log("Resetting data for date ", selectedDate);
+    setData([]);
+    //setselectedDate(date);
+
+    //reset selected week
+
+    // let currentTimecard = timecards.find((x) => moment(x.StartDate).toString() === selectedWeek.toString());
+    // console.log("Weeks timecard is", currentTimecard);
+    // setWeeksTimecard(currentTimecard);
+
+    let allTasks = weeksTimecard?.Tasks || [];
+    let todaysTasks = allTasks.filter((x) => moment(x.StartTime).startOf("day").toString() === moment(selectedDate).startOf("day").toString());
+    setData(todaysTasks.sort((a, b) => moment(b.StartTime) - moment(a.StartTime)));
   };
 
   const UpdateRecord = (record) => {
@@ -116,9 +129,7 @@ function DailyReport({ actions, timecards, tasks }) {
     let updatedTask = { ...editingTask };
 
     //Update the value of totalDuration
-    updatedTask.totalDuration = updatedTask.Notes.map(
-      (x) => x.duration
-    )?.reduce((sum, val) => sum + val);
+    updatedTask.totalDuration = updatedTask.Notes.map((x) => x.duration)?.reduce((sum, val) => sum + val);
 
     setEditingTask({});
     await onUpdateTask(updatedTask);
@@ -135,7 +146,7 @@ function DailyReport({ actions, timecards, tasks }) {
     let _tasks = [...weeksTimecard.Tasks];
     //check if task already exists
     let newTask = {
-      StartTime: moment(currentDate).toISOString(),
+      StartTime: moment(selectedDate).toISOString(),
       totalDuration: 0,
       TaskId: uuid(),
       TaskTypeId: task.type,
@@ -160,9 +171,7 @@ function DailyReport({ actions, timecards, tasks }) {
   };
 
   const onUpdateTask = async (task) => {
-    let updatedTasks = [
-      ...weeksTimecard.Tasks.filter((x) => x.TaskId !== task.TaskId),
-    ];
+    let updatedTasks = [...weeksTimecard.Tasks.filter((x) => x.TaskId !== task.TaskId)];
     updatedTasks = [...updatedTasks];
     updatedTasks.push(task);
     let updatedTimeCard = { ...weeksTimecard };
@@ -174,11 +183,8 @@ function DailyReport({ actions, timecards, tasks }) {
 
   const onInputChange = (e, key, index) => {
     let updatingTask = { ...editingTask };
-    let taskNoteIndex = updatingTask.Notes.findIndex(
-      (x) => x.StartTime === index.StartTime && x.note === index.note
-    );
-    updatingTask.Notes[taskNoteIndex][key] =
-      key === "duration" ? parseInt(e.target.value) : e.target.value;
+    let taskNoteIndex = updatingTask.Notes.findIndex((x) => x.StartTime === index.StartTime && x.note === index.note);
+    updatingTask.Notes[taskNoteIndex][key] = key === "duration" ? parseInt(e.target.value) : e.target.value;
     setEditingTask(updatingTask);
   };
 
@@ -206,43 +212,23 @@ function DailyReport({ actions, timecards, tasks }) {
     setIsModalOpen(true);
   };
 
-  // const onDeleteNote = (record) => {
-  //   console.log('Deleting note', record)
-  //   let task = {...updatingTask};
-  // };
-
   const recordColumns = [
     {
       title: "Start Time",
       key: "StartTime",
       width: "300px",
-      render: (record, index) => (
-        <Input
-          value={record.StartTime}
-          onChange={(e) => onInputChange(e, "StartTime", index)}
-        />
-      ),
+      render: (record, index) => <Input value={record.StartTime} onChange={(e) => onInputChange(e, "StartTime", index)} />,
     },
     {
       title: "Duration",
       key: "duration",
-      render: (record, index) => (
-        <Input
-          value={record.duration}
-          onChange={(e) => onInputChange(e, "duration", index)}
-        />
-      ),
+      render: (record, index) => <Input value={record.duration} onChange={(e) => onInputChange(e, "duration", index)} />,
     },
     {
       title: "Note",
       key: "note",
       width: "500px",
-      render: (record, index) => (
-        <TextArea
-          value={record.note}
-          onChange={(e) => onInputChange(e, "note", index)}
-        />
-      ),
+      render: (record, index) => <TextArea value={record.note} onChange={(e) => onInputChange(e, "note", index)} />,
     },
   ];
 
@@ -258,11 +244,7 @@ function DailyReport({ actions, timecards, tasks }) {
       key: "taskName",
       align: "center",
       render: (record) => {
-        return (
-          <Space direction="vrtical">
-            {tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Name ?? ""}
-          </Space>
-        );
+        return <Space direction="vrtical">{tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Name ?? ""}</Space>;
       },
     },
     {
@@ -270,11 +252,7 @@ function DailyReport({ actions, timecards, tasks }) {
       key: "TaskType",
       align: "center",
       render: (record) => {
-        return (
-          <Space direction="vrtical">
-            {tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Type ?? ""}
-          </Space>
-        );
+        return <Space direction="vrtical">{tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Type ?? ""}</Space>;
       },
     },
     {
@@ -296,15 +274,12 @@ function DailyReport({ actions, timecards, tasks }) {
           <Space direction="vertical">
             {Array.isArray(record.Notes) ? (
               record.Notes.map((note) => {
-                let display = `${moment(note.StartTime).format(
-                  "ddd Do HH:mm"
-                )} - (${note.duration}min) - ${note.note}`;
+                let display = `${moment(note.StartTime).format("ddd Do HH:mm")} - (${note.duration}min) - ${note.note}`;
                 return <div>{display}</div>;
               })
             ) : (
               <div>
-                {moment(record.StartTime).format("ddd Do HH:mm")} -{" "}
-                {record.totalDuration}min - {record.Notes}
+                {moment(record.StartTime).format("ddd Do HH:mm")} - {record.totalDuration}min - {record.Notes}
               </div>
             )}
           </Space>
@@ -328,14 +303,13 @@ function DailyReport({ actions, timecards, tasks }) {
     <div>
       <Row>
         <Col>
-          {/* <Select disabled={timecards?.length === 0} style={{ width: '200px' }} onChange={resetData} defaultValue={()=>  moment().format('Do MMM YY').toString()}> */}
-          <Select
-            disabled={timecards?.length === 0}
-            style={{ width: "200px" }}
-            onChange={(date) => resetData(moment(date))}
-            defaultValue={currentDate.format("Do MMM YY").toString()}
-          >
-            {dataFilter.map((data) => (
+          <Select disabled={timecards?.length === 0} style={{ width: "200px" }} onChange={OnWeekChanged} defaultValue={selectedWeek.format("Do MMM YY").toString()}>
+            {weeksFilter.map((data) => (
+              <Option key={data}>{moment(data).format("Do MMM YY")}</Option>
+            ))}
+          </Select>
+          <Select disabled={timecards?.length === 0} style={{ width: "200px" }} onChange={(date) => setselectedDate(moment(date))} defaultValue={selectedDate.format("Do MMM YY").toString()}>
+            {daysFilter.map((data) => (
               <Option key={data}>{moment(data).format("Do MMM YY")}</Option>
             ))}
           </Select>
@@ -361,12 +335,7 @@ function DailyReport({ actions, timecards, tasks }) {
             hideOnSinglePage: true,
           }}
           summary={(pageData) => {
-            let minutes =
-              pageData.length > 0
-                ? pageData
-                    .map((x) => x.totalDuration)
-                    ?.reduce((sum, val) => sum + val)
-                : 0;
+            let minutes = pageData.length > 0 ? pageData.map((x) => x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
             let hrs = Math.floor(minutes / 60);
             let min = minutes - hrs * 60;
             let display = `${hrs}hrs ${min}min`;
@@ -384,51 +353,23 @@ function DailyReport({ actions, timecards, tasks }) {
         />
       </Row>
 
-      <Modal
-        title="Basic Modal"
-        open={isModalOpen}
-        footer={null}
-        onCancel={() => setIsModalOpen(false)}
-        width="800px"
-      >
+      <Modal title="Basic Modal" open={isModalOpen} footer={null} onCancel={() => setIsModalOpen(false)} width="800px">
         <>
           <div>{JSON.stringify(editingTask)}</div>
-          <Table
-            rowKey="id"
-            columns={recordColumns}
-            dataSource={editingTask.Notes}
-            pagination={false}
-          />
+          <Table rowKey="id" columns={recordColumns} dataSource={editingTask.Notes} pagination={false} />
           <Row>
             <Button onClick={() => OnSaveRecord()}>Save</Button>
           </Row>
         </>
       </Modal>
 
-      <Modal
-        title="Add Task"
-        open={isTaskModalOpen}
-        footer={null}
-        onCancel={() => setIsTaskModalOpen(false)}
-      >
-        <Form
-          name="createTask"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
-          form={form}
-          onFinish={onCreateTask}
-        >
-          <Form.Item
-            label="Task Type"
-            name="type"
-            rules={[{ required: true, message: "Please select a type!" }]}
-          >
+      <Modal title="Add Task" open={isTaskModalOpen} footer={null} onCancel={() => setIsTaskModalOpen(false)}>
+        <Form name="createTask" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }} form={form} onFinish={onCreateTask}>
+          <Form.Item label="Task Type" name="type" rules={[{ required: true, message: "Please select a type!" }]}>
             <Select style={{ width: "300px" }}>
               {tasks
                 ?.filter((x) => x.IsVisible)
-                .sort((a, b) =>
-                  a.Type.toLowerCase() > b.Type.toLowerCase() ? 1 : -1
-                )
+                .sort((a, b) => (a.Type.toLowerCase() > b.Type.toLowerCase() ? 1 : -1))
                 .map((tc) => (
                   <Option key={tc.TaskId}>
                     {tc.Type} - {tc.Name}
@@ -461,10 +402,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      getUserTimecards: bindActionCreators(
-        tcActions.getUserTimecards,
-        dispatch
-      ),
+      getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch),
       getTasks: bindActionCreators(tcActions.getTasks, dispatch),
       updateTimecard: bindActionCreators(tcActions.updateTimecard, dispatch),
     },
