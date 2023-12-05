@@ -37,7 +37,7 @@ function DailyReport({ actions, timecards, tasks }) {
   useEffect(() => {
     if (timecards.length > 0) {
       if (!weeksFilter.length > 0) populateWeeksFilter();
-      if (!daysFilter.length > 0) populateDaysFilter();
+      if (!daysFilter.length > 0) populateDaysFilter(selectedWeek);
       resetData();
     }
   }, [timecards]);
@@ -60,6 +60,7 @@ function DailyReport({ actions, timecards, tasks }) {
   };
 
   const populateDaysFilter = async (startWeekDate) => {
+    console.log("Populating start week date", startWeekDate);
     let availableDays = [];
     let selectedDate = moment(startWeekDate);
 
