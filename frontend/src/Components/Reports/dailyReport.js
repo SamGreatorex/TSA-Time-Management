@@ -36,14 +36,13 @@ function DailyReport({ actions, timecards, tasks }) {
 
   useEffect(() => {
     if (timecards.length > 0) {
-      populateWeeksFilter();
-      populateDaysFilter();
-      //resetData(selectedDate, moment().startOf("isoWeek").toString());
+      if (!weeksFilter.length > 0) populateWeeksFilter();
+      if (!daysFilter.length > 0) populateDaysFilter();
+      resetData();
     }
   }, [timecards]);
 
   useEffect(() => {
-    console.log("Selected Date changed", selectedDate, selectedWeek, weeksTimecard);
     resetData();
   }, [selectedDate]);
 
@@ -61,43 +60,30 @@ function DailyReport({ actions, timecards, tasks }) {
   };
 
   const populateDaysFilter = async (startWeekDate) => {
-    console.log("Populating Available Days for ", startWeekDate);
     let availableDays = [];
     let selectedDate = moment(startWeekDate);
-    console.log("selectedDate", selectedDate);
 
     for (let i = 0; i < 7; i++) {
       availableDays.push(moment(startWeekDate).add("days", i).toString());
     }
     setdaysFilter([...availableDays]);
     setselectedDate(moment(startWeekDate));
-    // resetData(startWeekDate);
-    console.log(availableDays);
   };
 
   const OnWeekChanged = async (date) => {
-    console.log("Selected Week Changed", date);
     setSelectedWeek(moment(date));
     let currentTimecard = timecards.find((x) => moment(x.StartDate).toString() === date.toString());
-    console.log("Weeks timecard is", currentTimecard);
     setWeeksTimecard(currentTimecard);
     populateDaysFilter(moment(date));
   };
 
   const resetData = async () => {
-    console.log("Resetting data for date ", selectedDate);
     setData([]);
-    //setselectedDate(date);
-
-    //reset selected week
-
-    // let currentTimecard = timecards.find((x) => moment(x.StartDate).toString() === selectedWeek.toString());
-    // console.log("Weeks timecard is", currentTimecard);
-    // setWeeksTimecard(currentTimecard);
 
     let allTasks = weeksTimecard?.Tasks || [];
     let todaysTasks = allTasks.filter((x) => moment(x.StartTime).startOf("day").toString() === moment(selectedDate).startOf("day").toString());
-    setData(todaysTasks.sort((a, b) => moment(b.StartTime) - moment(a.StartTime)));
+    let sortedTasks = todaysTasks.sort((a, b) => moment(b.StartTime) - moment(a.StartTime));
+    setData(sortedTasks);
   };
 
   const UpdateRecord = (record) => {
@@ -124,8 +110,6 @@ function DailyReport({ actions, timecards, tasks }) {
   };
 
   const OnSaveRecord = async () => {
-    console.log("Saving Record", editingTask);
-
     let updatedTask = { ...editingTask };
 
     //Update the value of totalDuration
@@ -136,14 +120,11 @@ function DailyReport({ actions, timecards, tasks }) {
   };
 
   const onCreateTask = async (task) => {
-    console.log("Adding task", task);
-
-    // let existingTasks = currentTimecard.AvailableTasks;
-    // existingTasks.push(tasks.find(x=> x.TaskId === task.type));
     let availableTasks = [...weeksTimecard.AvailableTasks];
     availableTasks.push(tasks.find((x) => x.TaskId === task.type));
 
     let _tasks = [...weeksTimecard.Tasks];
+
     //check if task already exists
     let newTask = {
       StartTime: moment(selectedDate).toISOString(),
@@ -153,7 +134,7 @@ function DailyReport({ actions, timecards, tasks }) {
       Notes: [
         {
           noteId: uuid(),
-          StartTime: moment().toISOString(),
+          StartTime: moment(selectedDate).toISOString(),
           duration: 0,
           note: "",
         },
@@ -166,7 +147,9 @@ function DailyReport({ actions, timecards, tasks }) {
     timecard.AvailableTasks = availableTasks;
     timecard.Tasks = _tasks;
 
+    setWeeksTimecard(timecard);
     actions.updateTimecard(timecard);
+    resetData();
     setIsTaskModalOpen(false);
   };
 
@@ -192,7 +175,7 @@ function DailyReport({ actions, timecards, tasks }) {
     let notes = [];
     notes.push({
       noteId: uuid(),
-      StartTime: moment().toISOString(),
+      StartTime: moment(selectedDate).toISOString(),
       duration: 15,
       note: "",
     });
@@ -303,12 +286,12 @@ function DailyReport({ actions, timecards, tasks }) {
     <div>
       <Row>
         <Col>
-          <Select disabled={timecards?.length === 0} style={{ width: "200px" }} onChange={OnWeekChanged} defaultValue={selectedWeek.format("Do MMM YY").toString()}>
+          <Select disabled={timecards?.length === 0} style={{ width: "200px" }} onChange={OnWeekChanged} value={selectedWeek.format("Do MMM YY").toString()}>
             {weeksFilter.map((data) => (
               <Option key={data}>{moment(data).format("Do MMM YY")}</Option>
             ))}
           </Select>
-          <Select disabled={timecards?.length === 0} style={{ width: "200px" }} onChange={(date) => setselectedDate(moment(date))} defaultValue={selectedDate.format("Do MMM YY").toString()}>
+          <Select disabled={timecards?.length === 0} style={{ width: "200px" }} onChange={(date) => setselectedDate(moment(date))} value={selectedDate.format("Do MMM YY").toString()}>
             {daysFilter.map((data) => (
               <Option key={data}>{moment(data).format("Do MMM YY")}</Option>
             ))}
