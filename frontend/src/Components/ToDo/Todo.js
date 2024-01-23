@@ -3,28 +3,10 @@ import * as todoApi from "../../apis/todo";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import * as tcActions from "../../redux/actions/timecards";
-import {
-  Form,
-  Popconfirm,
-  Table,
-  Typography,
-  Input,
-  DatePicker,
-  Select,
-  Tag,
-  Button,
-  Cascader,
-  Modal,
-  List,
-  Space,
-} from "antd";
+import { Form, Popconfirm, Table, Typography, Input, DatePicker, Select, Tag, Button, Cascader, Modal, List, Space } from "antd";
 import { v4 as uuid } from "uuid";
 import moment, { min } from "moment";
-import {
-  AddTaskNote,
-  GetCurrentTimecard,
-  GetTaskSelectOptions,
-} from "../../utils/helpers";
+import { AddTaskNote, GetCurrentTimecard, GetTaskSelectOptions } from "../../utils/helpers";
 
 const { TextArea } = Input;
 
@@ -52,8 +34,7 @@ function Todo({ actions, timecards, tasks }) {
   const [data, setData] = useState([]);
   const [editingKey, setEditingKey] = useState("");
   const [taskSaving, setTaskSaving] = useState("");
-  const [taskSelectOptions, setTaskSelectOptions] =
-    useState(GetTaskSelectOptions);
+  const [taskSelectOptions, setTaskSelectOptions] = useState(GetTaskSelectOptions);
   const isEditing = (record) => record.Id === editingKey;
   const [minutes, setMinutes] = useState(null);
   const [taskDate, setTaskDate] = useState(moment());
@@ -74,18 +55,9 @@ function Todo({ actions, timecards, tasks }) {
     if (tasks.length > 0) getSelectOptions();
   }, [tasks]);
 
-  const EditableCell = ({
-    editing,
-    dataIndex,
-    title,
-    record,
-    index,
-    children,
-    ...restProps
-  }) => {
+  const EditableCell = ({ editing, dataIndex, title, record, index, children, ...restProps }) => {
     let inputNode = <Input />;
-    if (dataIndex === "ReviewDate")
-      inputNode = <DatePicker format="DD-MM-YYYY" />;
+    if (dataIndex === "ReviewDate") inputNode = <DatePicker format="DD-MM-YYYY" />;
     if (dataIndex === "Progress") {
       const rows = record.Progress.split("\n");
       inputNode = <TextArea rows={rows.length + 1} />;
@@ -100,13 +72,7 @@ function Todo({ actions, timecards, tasks }) {
         />
       );
     if (dataIndex === "TaskId") {
-      inputNode = (
-        <Cascader
-          style={{ paddingLeft: "10px" }}
-          options={taskSelectOptions}
-          placeholder="Select Task"
-        />
-      );
+      inputNode = <Cascader style={{ paddingLeft: "10px" }} options={taskSelectOptions} placeholder="Select Task" />;
     }
 
     return (
@@ -134,12 +100,7 @@ function Todo({ actions, timecards, tasks }) {
 
   const LoadData = async () => {
     const data = await todoApi.listTodo();
-    if (data.length > 0)
-      setData(
-        data
-          .filter((x) => x.Status !== "Completed")
-          .sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate))
-      );
+    if (data.length > 0) setData(data.filter((x) => x.Status !== "Completed").sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate)));
   };
 
   const edit = (record) => {
@@ -227,17 +188,13 @@ function Todo({ actions, timecards, tasks }) {
         });
 
         await todoApi.createTodo(newData[index]);
-        setData(
-          newData.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate))
-        );
+        setData(newData.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate)));
 
         setEditingKey("");
       } else {
         newData.push(row);
         await todoApi.createTodo(row);
-        setData(
-          newData.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate))
-        );
+        setData(newData.sort((a, b) => moment(a.ReviewDate) - moment(b.ReviewDate)));
 
         setEditingKey("");
       }
@@ -292,7 +249,7 @@ function Todo({ actions, timecards, tasks }) {
             {rows.map((row, index) => {
               return (
                 <List.Item style={{ padding: "0px" }} key={index}>
-                  {row}
+                  <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>{row}</div>
                 </List.Item>
               );
             })}
@@ -340,18 +297,12 @@ function Todo({ actions, timecards, tasks }) {
                 Save (+time)
               </Typography.Link>
             )}
-            <Popconfirm
-              title="Sure to cancel?"
-              onConfirm={() => cancel(record)}
-            >
+            <Popconfirm title="Sure to cancel?" onConfirm={() => cancel(record)}>
               <a href="/">Cancel</a>
             </Popconfirm>
           </Space>
         ) : (
-          <Typography.Link
-            disabled={editingKey !== ""}
-            onClick={() => edit(record)}
-          >
+          <Typography.Link disabled={editingKey !== ""} onClick={() => edit(record)}>
             Edit
           </Typography.Link>
         );
@@ -447,10 +398,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      getUserTimecards: bindActionCreators(
-        tcActions.getUserTimecards,
-        dispatch
-      ),
+      getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch),
       updateTimecard: bindActionCreators(tcActions.updateTimecard, dispatch),
       getTasks: bindActionCreators(tcActions.getTasks, dispatch),
     },
