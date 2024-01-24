@@ -253,16 +253,17 @@ function DailyReport({ actions, timecards, tasks }) {
     {
       title: "Notes",
       key: "Notes",
+      width: "45%",
       render: (record) => {
         return (
           <Space direction="vertical">
             {Array.isArray(record.Notes) ? (
               record.Notes.map((note) => {
                 let display = `${moment(note.StartTime).format("ddd Do HH:mm")} - (${note.duration}min) - ${note.note}`;
-                return <div>{display}</div>;
+                return <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>{display}</div>;
               })
             ) : (
-              <div>
+              <div style={{ wordWrap: "break-word", wordBreak: "break-word" }}>
                 {moment(record.StartTime).format("ddd Do HH:mm")} - {record.totalDuration}min - {record.Notes}
               </div>
             )}
