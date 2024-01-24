@@ -1,38 +1,19 @@
 const getBackendURL = () => {
   const host = window.location.host;
   console.log("Host is:", host);
-  if (
-    host === "time-management-frontend-dev.s3-website.eu-west-2.amazonaws.com"
-  ) {
-    console.log(
-      "Setting Dev URL - https://w0c4hplipl.execute-api.eu-west-2.amazonaws.com/dev"
-    );
-    return "https://w0c4hplipl.execute-api.eu-west-2.amazonaws.com/dev";
-  } else if (
-    host === "time-management-frontend-prod.s3-website.eu-west-2.amazonaws.com"
-  ) {
-    console.log(
-      "Setting Prod URL -  https://my7yhf9xc7.execute-api.eu-west-2.amazonaws.com/prod"
-    );
-    return "https://my7yhf9xc7.execute-api.eu-west-2.amazonaws.com/prod";
-  } else {
+  if (host.includes("localhost")) {
     return "http://localhost:4000/dev";
+  } else {
+    return "https://my7yhf9xc7.execute-api.eu-west-2.amazonaws.com/prod";
   }
 };
 
 const getEnvironment = () => {
   const host = window.location.host;
-  console.log("Host is:", host);
-  if (
-    host === "time-management-frontend-dev.s3-website.eu-west-2.amazonaws.com"
-  ) {
-    return "dev";
-  } else if (
-    host === "time-management-frontend-prod.s3-website.eu-west-2.amazonaws.com"
-  ) {
-    return "prod";
-  } else {
+  if (host.includes("localhost")) {
     return "localhost";
+  } else {
+    return "prod";
   }
 };
 

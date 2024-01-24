@@ -58,6 +58,10 @@ function Todo({ actions, timecards, tasks }) {
   const EditableCell = ({ editing, dataIndex, title, record, index, children, ...restProps }) => {
     let inputNode = <Input />;
     if (dataIndex === "ReviewDate") inputNode = <DatePicker format="DD-MM-YYYY" />;
+    if (dataIndex === "Task") {
+      const rows = record.Progress.split("\n");
+      inputNode = <TextArea rows={rows.length + 1} />;
+    }
     if (dataIndex === "Progress") {
       const rows = record.Progress.split("\n");
       inputNode = <TextArea rows={rows.length + 1} />;
