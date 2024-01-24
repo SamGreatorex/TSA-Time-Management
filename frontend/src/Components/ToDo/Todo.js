@@ -6,7 +6,7 @@ import * as tcActions from "../../redux/actions/timecards";
 import { Form, Popconfirm, Table, Typography, Input, DatePicker, Select, Tag, Button, Cascader, Modal, List, Space } from "antd";
 import { v4 as uuid } from "uuid";
 import moment, { min } from "moment";
-import { AddTaskNote, GetCurrentTimecard, GetTaskSelectOptions } from "../../utils/helpers";
+import { AddTaskNote, GetCurrentTimecard, GetSpecificTimecard, GetTaskSelectOptions } from "../../utils/helpers";
 
 const { TextArea } = Input;
 
@@ -137,12 +137,15 @@ function Todo({ actions, timecards, tasks }) {
     //save timecard entry
     let row = await form.validateFields();
     let progressNote = row.Progress.split("\n")[0];
-    console.log("St");
+
     let taskId = Array.isArray(row.TaskId) ? row.TaskId[1] : row.TaskId;
+
     if (taskId) {
       //Need to save the time to the task
       console.log("Task Date is ", taskDate.toISOString());
-      const timecard = await GetCurrentTimecard();
+
+      const timecard = await GetSpecificTimecard(taskDate.toISOString());
+
       let note = {
         noteId: uuid(),
         StartTime: taskDate.toISOString(),

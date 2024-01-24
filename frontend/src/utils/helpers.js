@@ -24,9 +24,7 @@ export async function AddNewAvailableTask(taskId, timecardId) {
   //get the actual task
   const state = store.getState();
   const task = state.timecards.tasks?.find((x) => x.TaskId === taskId);
-  const timecard = state.timecards.usercards.find(
-    (x) => x.TimeCardId === timecardId
-  );
+  const timecard = state.timecards.usercards.find((x) => x.TimeCardId === timecardId);
 
   let updatedTasks = [...timecard.AvailableTasks];
   if (!updatedTasks.find((x) => x.TaskId === taskId)) {
@@ -40,25 +38,16 @@ export async function AddNewAvailableTask(taskId, timecardId) {
 //Function add a new Task to a timecard. Will add to Available tasks
 export async function OnAddNewTask(timecardId, tasktypeId) {
   const state = store.getState();
-  const timecard = state.timecards.usercards.find(
-    (x) => x.TimeCardId === timecardId
-  );
+  const timecard = state.timecards.usercards.find((x) => x.TimeCardId === timecardId);
 
   //Does the task already exist for the day.
   let existingTask = {
-    ...timecard.Tasks?.find(
-      (x) =>
-        x.TaskTypeId === tasktypeId &&
-        moment(x.StartTime).startOf("day").toString() ===
-          moment().startOf("day").toString()
-    ),
+    ...timecard.Tasks?.find((x) => x.TaskTypeId === tasktypeId && moment(x.StartTime).startOf("day").toString() === moment().startOf("day").toString()),
   };
 
   //if task does not exist create new
   let newTask = {
-    StartTime: existingTask?.StartTime
-      ? existingTask.StartTime
-      : moment().toISOString(),
+    StartTime: existingTask?.StartTime ? existingTask.StartTime : moment().toISOString(),
     totalDuration: existingTask?.totalDuration ? existingTask.totalDuration : 0,
     TaskId: existingTask?.TaskId ? existingTask.TaskId : uuid(),
     TaskTypeId: tasktypeId,
@@ -74,27 +63,12 @@ export async function OnAddNewTask(timecardId, tasktypeId) {
   store.dispatch(updateTimecard(updatedTimeCard));
 }
 
-export async function OnUpdateTask(
-  timecardId,
-  taskId,
-  duration,
-  note,
-  IsInProgress
-) {
-  console.log(
-    "Task in Progress",
-    timecardId,
-    taskId,
-    duration,
-    note,
-    IsInProgress
-  );
+export async function OnUpdateTask(timecardId, taskId, duration, note, IsInProgress) {
+  console.log("Task in Progress", timecardId, taskId, duration, note, IsInProgress);
 
   try {
     const state = store.getState();
-    const timecard = state.timecards.usercards.find(
-      (x) => x.TimeCardId === timecardId
-    );
+    const timecard = state.timecards.usercards.find((x) => x.TimeCardId === timecardId);
 
     //Get the Existing Task.
     let existingTask = {
@@ -129,23 +103,15 @@ export async function OnUpdateTask(
 
 export async function AddTaskNote(timecardId, tasktypeId, note) {
   const state = store.getState();
-  const timecard = state.timecards.usercards.find(
-    (x) => x.TimeCardId === timecardId
-  );
+  const timecard = state.timecards.usercards.find((x) => x.TimeCardId === timecardId);
   let allTasks = [];
 
   //Get the Existing Task
   let existingTask = {
-    ...timecard.Tasks?.find(
-      (x) =>
-        x.TaskTypeId === tasktypeId &&
-        moment(x.StartTime).startOf("day").toString() ===
-          moment(note.StartTime).startOf("day").toString()
-    ),
+    ...timecard.Tasks?.find((x) => x.TaskTypeId === tasktypeId && moment(x.StartTime).startOf("day").toString() === moment(note.StartTime).startOf("day").toString()),
   };
 
-  const taskId =
-    Object.keys(existingTask).length === 0 ? uuid() : existingTask.TaskId;
+  const taskId = Object.keys(existingTask).length === 0 ? uuid() : existingTask.TaskId;
   if (Object.keys(existingTask).length === 0) {
     console.log("No Task Found");
     //create a new task
@@ -174,16 +140,14 @@ export async function AddTaskNote(timecardId, tasktypeId, note) {
     store.dispatch(updateTimecard(updatedTimeCard));
   } else {
     console.log("Existing Task Found", existingTask);
-    let existingNotes =
-      existingTask.Notes.length > 0 ? [...existingTask.Notes] : [];
+    let existingNotes = existingTask.Notes.length > 0 ? [...existingTask.Notes] : [];
     if (note) {
       existingNotes.push(note);
     }
     //if task does not exist create new
     let updatedTask = {
       StartTime: existingTask?.StartTime,
-      totalDuration:
-        parseInt(existingTask.totalDuration) + parseInt(note.duration),
+      totalDuration: parseInt(existingTask.totalDuration) + parseInt(note.duration),
       TaskId: existingTask.TaskId,
       TaskTypeId: existingTask.TaskTypeId,
       Notes: existingNotes,
@@ -200,27 +164,24 @@ export async function AddTaskNote(timecardId, tasktypeId, note) {
 
 export async function GetCurrentTimecard() {
   const state = store.getState();
-  const timecard = state.timecards.usercards.find(
-    (x) =>
-      moment(x.StartDate).toString() === moment().startOf("isoWeek").toString()
-  );
+  const timecard = state.timecards.usercards.find((x) => moment(x.StartDate).toString() === moment().startOf("isoWeek").toString());
   return { ...timecard };
 }
-
+export async function GetSpecificTimecard(date) {
+  const state = store.getState();
+  const timecard = state.timecards.usercards.find((x) => moment(x.StartDate).toString() === moment(date).startOf("isoWeek").toString());
+  return { ...timecard };
+}
 export async function GetTaskSelectOptions() {
   const state = store.getState();
   const tasks = state.timecards.tasks;
   const options = [];
   if (tasks?.length === 0) return;
-  let taskSorted = tasks
-    .filter((x) => x.IsVisible)
-    .sort((a, b) => (a.Name.toLowerCase() > b.Name.toLowerCase() ? 1 : -1));
+  let taskSorted = tasks.filter((x) => x.IsVisible).sort((a, b) => (a.Name.toLowerCase() > b.Name.toLowerCase() ? 1 : -1));
   for (let i = 0; i < taskSorted.length; i++) {
     let d = taskSorted[i];
     options.find((x) => x.value === d.Type)
-      ? options
-          .find((x) => x.value === d.Type)
-          .children.push({ value: d.TaskId, label: d.Name })
+      ? options.find((x) => x.value === d.Type).children.push({ value: d.TaskId, label: d.Name })
       : options.push({
           value: d.Type,
           label: d.Type,
