@@ -222,6 +222,12 @@ function Todo({ actions, timecards, tasks }) {
       dataIndex: "TaskId",
       width: "15%",
       editable: true,
+      filters: tasks
+        .filter(function (item) {
+          return [...new Set(data.map((x) => x.TaskId))].indexOf(item.TaskId) !== -1;
+        })
+        .map((t) => ({ value: t.TaskId, text: `${t.Type} - ${t.Name}` })),
+      onFilter: (value, record) => record.TaskId.indexOf(value) === 0,
       render: (record) => {
         let foundTask = tasks?.find((x) => x.TaskId === record);
         return <div>{foundTask ? foundTask.Name : ""}</div>;
@@ -232,7 +238,9 @@ function Todo({ actions, timecards, tasks }) {
       dataIndex: "Status",
       width: "5%",
       editable: true,
-      render: (record) => {
+      filters: [...new Set(data.map((x) => x.Status))].map((s) => ({ value: s, text: s })),
+      onFilter: (value, record) => record.Status.indexOf(value) === 0,
+      render: (record, allData) => {
         let tagColor = "blue";
         if (record === "In Progress") tagColor = "Orange";
         if (record === "Waiting") tagColor = "Red";
