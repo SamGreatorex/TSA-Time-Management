@@ -97,9 +97,14 @@ module.exports.list = async (event, context, callback) => {
       "#TaskType": "TaskType",
       "#Person": "Person",
     };
+
+    let FilterExpression = "#Status <> :Status";
+    let ExpressionAttributeValues = {
+      ":Status": "Completed",
+    };
     const ProjectionExpression = "#Id, #Task, #Status, #IsVisible, #Progress, #ReviewDate, #TaskId, #Person, #TaskType";
 
-    var requests = await dynamo.dynamoScan(dynamoTable, null, ExpressionAttributeNames, null, ProjectionExpression);
+    var requests = await dynamo.dynamoScan(dynamoTable, FilterExpression, ExpressionAttributeNames, ExpressionAttributeValues, ProjectionExpression);
     console.log("Request response", requests);
     return responseLib.success(requests);
   } catch (error) {
@@ -126,7 +131,7 @@ module.exports.get = async (event, context, callback) => {
 
     var requests = await dynamo.dynamoScan(dynamoTable, FilterExpression, ExpressionAttributeNames, ExpressionAttributeValues);
     console.log("List Todo Request response", requests);
-    return responseLib.success(requests);
+    return responseLib.success(requests.filter);
   } catch (error) {
     console.log("Error", error);
     return responseLib.failure(error.statusCode.status, error.statusCode.message);
