@@ -60,7 +60,6 @@ function DailyReport({ actions, timecards, tasks }) {
   };
 
   const populateDaysFilter = async (startWeekDate) => {
-    console.log("Populating start week date", startWeekDate);
     let availableDays = [];
     let selectedDate = moment(startWeekDate);
 

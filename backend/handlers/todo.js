@@ -24,10 +24,7 @@ module.exports.create = async (event, context, callback) => {
     return responseLib.success(response.body);
   } catch (error) {
     console.log("Error", error);
-    return responseLib.failure(
-      error.statusCode.status,
-      error.statusCode.message
-    );
+    return responseLib.failure(error.statusCode.status, error.statusCode.message);
   }
 };
 
@@ -52,10 +49,7 @@ module.exports.update = async (event, context, callback) => {
     return responseLib.success(response.body);
   } catch (error) {
     console.log("Error", error);
-    return responseLib.failure(
-      error.statusCode.status,
-      error.statusCode.message
-    );
+    return responseLib.failure(error.statusCode.status, error.statusCode.message);
   }
 };
 
@@ -74,22 +68,13 @@ module.exports.delete = async (event, context, callback) => {
       ":x": false,
     };
 
-    let response = await dynamo.dynamoUpdateItem(
-      dynamoTable,
-      "Id",
-      pathParameters.Id,
-      UpdateExpression,
-      ExpressionAttributeValues
-    );
+    let response = await dynamo.dynamoUpdateItem(dynamoTable, "Id", pathParameters.Id, UpdateExpression, ExpressionAttributeValues);
 
     console.log("Dynamo delete response.", response);
     return responseLib.success(response.body);
   } catch (error) {
     console.log("Error", error);
-    return responseLib.failure(
-      error.statusCode.status,
-      error.statusCode.message
-    );
+    return responseLib.failure(error.statusCode.status, error.statusCode.message);
   }
 };
 
@@ -109,26 +94,17 @@ module.exports.list = async (event, context, callback) => {
       "#Progress": "Progress",
       "#ReviewDate": "ReviewDate",
       "#TaskId": "TaskId",
+      "#TaskType": "TaskType",
       "#Person": "Person",
     };
-    const ProjectionExpression =
-      "#Id, #Task, #Status, #IsVisible, #Progress, #ReviewDate, #TaskId, #Person";
+    const ProjectionExpression = "#Id, #Task, #Status, #IsVisible, #Progress, #ReviewDate, #TaskId, #Person, #TaskType";
 
-    var requests = await dynamo.dynamoScan(
-      dynamoTable,
-      null,
-      ExpressionAttributeNames,
-      null,
-      ProjectionExpression
-    );
+    var requests = await dynamo.dynamoScan(dynamoTable, null, ExpressionAttributeNames, null, ProjectionExpression);
     console.log("Request response", requests);
     return responseLib.success(requests);
   } catch (error) {
     console.log("Error", error);
-    return responseLib.failure(
-      error.statusCode.status,
-      error.statusCode.message
-    );
+    return responseLib.failure(error.statusCode.status, error.statusCode.message);
   }
 };
 
@@ -148,19 +124,11 @@ module.exports.get = async (event, context, callback) => {
       ":TaskId": pathParameters.TaskId,
     };
 
-    var requests = await dynamo.dynamoScan(
-      dynamoTable,
-      FilterExpression,
-      ExpressionAttributeNames,
-      ExpressionAttributeValues
-    );
+    var requests = await dynamo.dynamoScan(dynamoTable, FilterExpression, ExpressionAttributeNames, ExpressionAttributeValues);
     console.log("List Todo Request response", requests);
     return responseLib.success(requests);
   } catch (error) {
     console.log("Error", error);
-    return responseLib.failure(
-      error.statusCode.status,
-      error.statusCode.message
-    );
+    return responseLib.failure(error.statusCode.status, error.statusCode.message);
   }
 };

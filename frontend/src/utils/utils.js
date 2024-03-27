@@ -10,7 +10,6 @@ export async function handleResponseNoBody(response) {
 }
 
 export function handleError(error, custom401page = null) {
-  console.log("Handling error", error);
   if (!error || (error.response && error.response.status === 401)) {
     if (custom401page) {
       window.location.href = custom401page;
@@ -45,7 +44,6 @@ export function getRedirectUrl() {
 }
 
 export async function convertMinToStringTime(minutes) {
-  console.log(`Converting ${minutes} to time display`);
   let hrs = Math.floor(minutes / 60);
   let min = minutes - hrs * 60;
   return `${hrs}hrs ${min}min`;

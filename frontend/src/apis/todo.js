@@ -3,8 +3,6 @@ import { handleResponse, handleError } from "../utils/utils";
 import globals from "../utils/globals";
 
 export const listTodo = async () => {
-  console.log("Getting ToDo Items");
-
   try {
     let result = await axios({
       url: `${globals.BACKEND_URL}/listTodo`,
@@ -21,8 +19,6 @@ export const listTodo = async () => {
 };
 
 export const createTodo = async (item) => {
-  console.log("Create ToDo Items");
-
   try {
     let result = await axios({
       url: `${globals.BACKEND_URL}/todo`,
@@ -40,8 +36,6 @@ export const createTodo = async (item) => {
 };
 
 export const updateTodo = async (item) => {
-  console.log("Update ToDo Items");
-
   try {
     let result = await axios({
       url: `${globals.BACKEND_URL}/todo`,
@@ -59,8 +53,6 @@ export const updateTodo = async (item) => {
 };
 
 export const deleteTodo = async (itemId) => {
-  console.log("deleting ToDo Items");
-
   try {
     let result = await axios({
       url: `${globals.BACKEND_URL}/todo/${itemId}`,
@@ -77,8 +69,6 @@ export const deleteTodo = async (itemId) => {
 };
 
 export const getTodo = async (taskId) => {
-  console.log(`Getting ToDo Items for TaskID: ${taskId}`);
-
   try {
     let result = await axios({
       url: `${globals.BACKEND_URL}/todo/task/${taskId}`,

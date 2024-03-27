@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Select,
-  Row,
-  Col,
-  Table,
-  Typography,
-  Space,
-  Radio,
-  Checkbox,
-} from "antd";
+import { Select, Row, Col, Table, Typography, Space, Radio, Checkbox } from "antd";
 import * as tcActions from "../../redux/actions/timecards";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -25,9 +16,7 @@ function WeeklyReport({ actions, timecards, tasks }) {
   const [dataFilter, setDataFilter] = useState([]);
   const [weeksTimecard, setWeeksTimecard] = useState([]);
   const [groupByFunction, setGroupByFunction] = useState("Task");
-  const [currentDateFilter, setCurrentDateFilter] = useState(
-    moment().startOf("isoWeek")
-  );
+  const [currentDateFilter, setCurrentDateFilter] = useState(moment().startOf("isoWeek"));
   const [summaryData, setSummaryData] = useState({ Total: "", Remaining: "" });
 
   useEffect(() => {
@@ -56,9 +45,7 @@ function WeeklyReport({ actions, timecards, tasks }) {
   };
 
   const resetData = async (date, groupType) => {
-    let currentTimecard = timecards.find(
-      (x) => moment(x.StartDate).toString() === moment(date).toString()
-    );
+    let currentTimecard = timecards.find((x) => moment(x.StartDate).toString() === moment(date).toString());
     setWeeksTimecard(currentTimecard);
 
     let allTasks = currentTimecard?.Tasks || [];
@@ -129,25 +116,14 @@ function WeeklyReport({ actions, timecards, tasks }) {
     }
 
     //Set weekdates filter
-    let weekDates = timecards
-      .map((x) => x.StartDate)
-      .sort((a, b) => moment(b) - moment(a));
-    let minutes =
-      data.length > 0
-        ? data.map((x) => x.totalDuration)?.reduce((sum, val) => sum + val)
-        : 0;
+    let weekDates = timecards.map((x) => x.StartDate).sort((a, b) => moment(b) - moment(a));
+    let minutes = data.length > 0 ? data.map((x) => x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
     let total = await convertMinToStringTime(minutes);
     let remainingData = await convertMinToStringTime(40 * 5 - minutes);
     let summaryData = { Total: total, Remaining: remainingData };
 
     //Set the UI
     setDataFilter([...weekDates]);
-    console.log(
-      "Resetting Data",
-      allTasks.sort(
-        (a, b) => moment(b.Notes[0].StartTime) - moment(a.Notes[0].StartTime)
-      )
-    );
     setData(allTasks);
   };
 
@@ -156,11 +132,7 @@ function WeeklyReport({ actions, timecards, tasks }) {
       title: "Date",
       align: "center",
       render: (record) => {
-        return (
-          <Space direction="vertical">
-            {moment(record.StartTime).format("dddd Do")}
-          </Space>
-        );
+        return <Space direction="vertical">{moment(record.StartTime).format("dddd Do")}</Space>;
       },
     },
     {
@@ -168,11 +140,7 @@ function WeeklyReport({ actions, timecards, tasks }) {
       key: "taskName",
       align: "center",
       render: (record) => {
-        return (
-          <Space direction="vertical">
-            {tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Name ?? ""}
-          </Space>
-        );
+        return <Space direction="vertical">{tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Name ?? ""}</Space>;
       },
     },
     {
@@ -180,13 +148,7 @@ function WeeklyReport({ actions, timecards, tasks }) {
       key: "TaskType",
       align: "center",
       render: (record) => {
-        return (
-          <Space direction="vertical">
-            {record.TaskType
-              ? record.TaskType
-              : tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Type ?? ""}
-          </Space>
-        );
+        return <Space direction="vertical">{record.TaskType ? record.TaskType : tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Type ?? ""}</Space>;
       },
     },
     {
@@ -204,18 +166,9 @@ function WeeklyReport({ actions, timecards, tasks }) {
       title: "Added To Vivun",
       key: "addedVivun",
       render: (record) => {
-        const taskType =
-          tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Type ?? "";
-        const isVivun =
-          taskTypes.find((x) => x.value === taskType)?.vivunItem || false;
-        return (
-          isVivun && (
-            <Checkbox
-              onChange={(cb) => onVivunCheckboxChanged(cb, record)}
-              checked={record.addedVivun}
-            />
-          )
-        );
+        const taskType = tasks?.find((x) => x.TaskId === record.TaskTypeId)?.Type ?? "";
+        const isVivun = taskTypes.find((x) => x.value === taskType)?.vivunItem || false;
+        return isVivun && <Checkbox onChange={(cb) => onVivunCheckboxChanged(cb, record)} checked={record.addedVivun} />;
       },
     },
     {
@@ -226,15 +179,12 @@ function WeeklyReport({ actions, timecards, tasks }) {
           <Space direction="vertical">
             {Array.isArray(record.Notes) ? (
               record.Notes.map((note) => {
-                let display = `${moment(note.StartTime).format(
-                  "ddd Do HH:mm"
-                )} - ${note.duration}min - ${note.note}`;
+                let display = `${moment(note.StartTime).format("ddd Do HH:mm")} - ${note.duration}min - ${note.note}`;
                 return <div>{display}</div>;
               })
             ) : (
               <div>
-                {moment(record.StartTime).format("ddd Do HH:mm")} -{" "}
-                {record.totalDuration}min - {record.Notes}
+                {moment(record.StartTime).format("ddd Do HH:mm")} - {record.totalDuration}min - {record.Notes}
               </div>
             )}
           </Space>
@@ -244,24 +194,16 @@ function WeeklyReport({ actions, timecards, tasks }) {
   ];
 
   const onVivunCheckboxChanged = async (e, record) => {
-    console.log(`target = ${JSON.stringify(record.TaskId)}`);
-    console.log(`checked = ${e.target.checked}`, weeksTimecard);
-
-    let tasks = weeksTimecard.Tasks.filter(
-      (x) => x.TaskTypeId === record.TaskTypeId
-    );
-    let updatedTasks = [
-      ...weeksTimecard.Tasks.filter((x) => x.TaskTypeId !== record.TaskTypeId),
-    ];
+    let tasks = weeksTimecard.Tasks.filter((x) => x.TaskTypeId === record.TaskTypeId);
+    let updatedTasks = [...weeksTimecard.Tasks.filter((x) => x.TaskTypeId !== record.TaskTypeId)];
     updatedTasks = [...updatedTasks];
 
     for (let i = 0; i < tasks.length; i++) {
       let amendedTask = { ...tasks[i] };
       amendedTask.addedVivun = e.target.checked;
-      console.log("UpdatedTask", amendedTask);
+
       updatedTasks.push({ ...amendedTask });
     }
-    console.log("Tasks Changing", tasks);
 
     let updatedTimeCard = { ...weeksTimecard };
     updatedTimeCard.Tasks = updatedTasks;
@@ -273,12 +215,7 @@ function WeeklyReport({ actions, timecards, tasks }) {
     <div>
       <Row>
         <Col>
-          <Select
-            disabled={timecards?.length === 0}
-            style={{ width: "200px" }}
-            onChange={OnWeekChanged}
-            defaultValue={() => currentDateFilter.toString()}
-          >
+          <Select disabled={timecards?.length === 0} style={{ width: "200px" }} onChange={OnWeekChanged} defaultValue={() => currentDateFilter.toString()}>
             {dataFilter.map((data) => (
               <Option key={data}>{moment(data).format("Do MMM YY")}</Option>
             ))}
@@ -305,12 +242,7 @@ function WeeklyReport({ actions, timecards, tasks }) {
             hideOnSinglePage: true,
           }}
           summary={(pageData) => {
-            let minutes =
-              pageData.length > 0
-                ? pageData
-                    .map((x) => x.totalDuration)
-                    ?.reduce((sum, val) => sum + val)
-                : 0;
+            let minutes = pageData.length > 0 ? pageData.map((x) => x.totalDuration)?.reduce((sum, val) => sum + val) : 0;
             let hrs = Math.floor(minutes / 60);
             let min = minutes - hrs * 60;
             let display = `${hrs}hrs ${min}min`;
@@ -349,10 +281,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      getUserTimecards: bindActionCreators(
-        tcActions.getUserTimecards,
-        dispatch
-      ),
+      getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch),
       getTasks: bindActionCreators(tcActions.getTasks, dispatch),
       updateTimecard: bindActionCreators(tcActions.updateTimecard, dispatch),
     },

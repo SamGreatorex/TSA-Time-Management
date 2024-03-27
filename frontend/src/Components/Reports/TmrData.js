@@ -18,13 +18,10 @@ function TmrData({ timecards, actions }) {
   }, []);
 
   useEffect(() => {
-    console.log("timecards updated", timecards);
     loadData(timecards);
   }, [timecards]);
 
-  useEffect(() => {
-    console.log("TMR Data", tmrData);
-  }, [tmrData]);
+  useEffect(() => {}, [tmrData]);
 
   const dataColumns = [
     {
@@ -32,11 +29,7 @@ function TmrData({ timecards, actions }) {
       dataIndex: "StartTime",
       align: "center",
       render: (record) => {
-        return (
-          <Space direction="vertical">
-            {moment(record).format("dddd Do MMM hh:mm")}
-          </Space>
-        );
+        return <Space direction="vertical">{moment(record).format("dddd Do MMM hh:mm")}</Space>;
       },
       sorter: (a, b) => moment(a.StartTime) - moment(b.StartTime),
     },
@@ -64,7 +57,7 @@ function TmrData({ timecards, actions }) {
   const loadData = async (timecards) => {
     //Get all tasks into an array
     let allTasks = timecards.map((x) => x.Tasks).flat();
-    console.log("All Tasks", allTasks);
+
     //Get all TMR Tasks
     let tmrAvailableTasks = timecards
       .map((x) => x.AvailableTasks)
@@ -112,11 +105,8 @@ function TmrData({ timecards, actions }) {
   const OnTMRTypeChanged = async (type) => {
     setSelectedTmrType(type);
     setDisplayData([]);
-    console.log("Changing type", type, tmrData);
     let newData = [...tmrData];
-    console.log("New Data", newData);
     let data = newData.filter((x) => x.TaskTypeId === type);
-    console.log("Data for type", data);
     setDisplayData(data);
   };
 
@@ -124,10 +114,7 @@ function TmrData({ timecards, actions }) {
     <div>
       <Row>
         <Col>
-          <Select
-            style={{ width: "200px" }}
-            onChange={(type) => OnTMRTypeChanged(type)}
-          >
+          <Select style={{ width: "200px" }} onChange={(type) => OnTMRTypeChanged(type)}>
             {tmrTasks.map((task) => (
               <Option key={task.TaskId}>{task.Name}</Option>
             ))}
@@ -138,9 +125,7 @@ function TmrData({ timecards, actions }) {
         <Table
           style={{ whiteSpace: "pre", marginTop: "4px", alignSelf: "center" }}
           bordered
-          dataSource={displayData?.sort(
-            (a, b) => moment(b.StartTime) - moment(a.StartTime)
-          )}
+          dataSource={displayData?.sort((a, b) => moment(b.StartTime) - moment(a.StartTime))}
           rowKey={(record) => `${record.noteId}`}
           columns={dataColumns}
         />
@@ -158,10 +143,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     actions: {
-      getUserTimecards: bindActionCreators(
-        tcActions.getUserTimecards,
-        dispatch
-      ),
+      getUserTimecards: bindActionCreators(tcActions.getUserTimecards, dispatch),
     },
   };
 }

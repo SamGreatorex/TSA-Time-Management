@@ -64,8 +64,6 @@ export async function OnAddNewTask(timecardId, tasktypeId) {
 }
 
 export async function OnUpdateTask(timecardId, taskId, duration, note, IsInProgress) {
-  console.log("Task in Progress", timecardId, taskId, duration, note, IsInProgress);
-
   try {
     const state = store.getState();
     const timecard = state.timecards.usercards.find((x) => x.TimeCardId === timecardId);
@@ -112,8 +110,8 @@ export async function AddTaskNote(timecardId, tasktypeId, note) {
   };
 
   const taskId = Object.keys(existingTask).length === 0 ? uuid() : existingTask.TaskId;
+
   if (Object.keys(existingTask).length === 0) {
-    console.log("No Task Found");
     //create a new task
     let newTask = {
       StartTime: moment(note.StartTime).toISOString(),
@@ -139,7 +137,6 @@ export async function AddTaskNote(timecardId, tasktypeId, note) {
     }
     store.dispatch(updateTimecard(updatedTimeCard));
   } else {
-    console.log("Existing Task Found", existingTask);
     let existingNotes = existingTask.Notes.length > 0 ? [...existingTask.Notes] : [];
     if (note) {
       existingNotes.push(note);

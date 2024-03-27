@@ -1,6 +1,6 @@
 const getBackendURL = () => {
   const host = window.location.host;
-  console.log("Host is:", host);
+
   if (host.includes("localhost")) {
     return "http://localhost:4000/dev";
   } else {
